@@ -1,0 +1,107 @@
+- id: nanovlm-sync-mask-20260831
+  phenomenon:
+    signals:
+      - source: "Stage-2 L1 run_analysis + call-stack trace"
+        content: "aten::_local_scalar_dense: 1546 calls / 432.54 ms host; data/data_utils.py:72 contributes 370.96 ms across three profiled microbatches"
+      - source: "Stage-2 L1 op statistic"
+        content: "movement ops: 153.8 ms; identical causal/padding mask is constructed in each of 32 LM blocks and a float additive mask is unused by the NPU branch"
+      - source: "Stage-2 L0/L1 cross-check"
+        content: "L0 utilization 97.4%, L1 utilization 57.0%; the 40.4 percentage-point difference is a profiler-artifact warning"
+      - source: "Job 20964 image replacement microbenchmark"
+        content: "original index_put 0.624/0.823 ms median; masked_scatter 3.872/3.955 ms; dense gather+where 2.250/2.316 ms"
+    raw_context: "The apparent 228.15 ms host attribution to image-token index_put included upstream asynchronous wait; isolated synchronization showed the original operation is faster."
+  analysis_path:
+    profiling_ref: "profiling/20260831_021404_l1; profiling/20260831_021041_l0; profiling/20260831_030726_l0"
+    steps:
+      - action: "Cross-check L1 with L0 and trace all DEFINITE/WARNING findings to source"
+        observation: "The actionable exposed barriers were the NPU validity collective/item and repeated attention-mask construction."
+        reasoning: "L1 Free time was not used as a bottleneck classifier because the L0/L1 utilization gap exceeded 20 percentage points."
+      - action: "Move the validity MIN collective to the existing Gloo group"
+        observation: "2-NPU loss delta 0.27%; 16-NPU short improved from 70.168917 s to 69.553444 s."
+      - action: "Build the NPU causal+padding bool mask once per forward and remove the dead additive float mask"
+        observation: "S=1024/4096 loss and output bit-exact; gradient max diff <=1.9e-12; A1+B short 68.771468 s."
+      - action: "Test two functional replacements for image-token index_put"
+        observation: "Both were bit-exact but materially slower, so the original implementation was retained."
+  root_cause:
+    description: "Control-plane synchronization ran on HCCL/NPU and drained the asynchronous pipeline; NPU attention rebuilt an identical large mask in every LM block and also built an unused additive mask."
+    bottleneck_type: mixed
+    evidence: "L1 call stacks and operator data, followed by two-NPU numerical probes and independent 16-NPU short ablations."
+  optimization:
+    attempts:
+      - description: "CPU/Gloo validity synchronization"
+        dimension: hide_latency
+        implementation_detail: "data/data_utils.py accepts a process group; train.py passes PG_CPU for train/validation iterators and explicitly destroys the auxiliary group before HCCL."
+        equivalence_verification:
+          method: "2-NPU real training update with unchanged MIN semantics"
+          metrics:
+            - metric: relative_error
+              threshold: "< 1% loss"
+              value: "0.27%"
+          result: passed
+        performance_result:
+          metric: "16-NPU 25-step/100-microbatch wall clock"
+          baseline_ref: "Stage-1 fixed baseline"
+          before: "70.168917 s"
+          after: "69.553444 s"
+          verdict: accepted
+      - description: "Shared NPU attention mask and dead-mask elimination"
+        dimension: reuse_and_precompute
+        implementation_detail: "models/language_model.py constructs one contiguous bool causal+padding mask in LanguageModel.forward and passes it read-only through all blocks; NPU skips the unused float additive mask."
+        equivalence_verification:
+          method: "2-NPU S=1024/4096 forward, loss, input/parameter gradients, deterministic repeat, and two real updates"
+          metrics:
+            - metric: max_abs_diff
+              threshold: "<= 1e-6"
+              value: "output 0; input gradient <=5.9e-14; parameter gradient <=1.9e-12"
+            - metric: relative_error
+              threshold: "< 1% update loss"
+              value: "0.40%"
+          result: passed
+        performance_result:
+          metric: "16-NPU 25-step/100-microbatch wall clock"
+          baseline_ref: "CPU/Gloo candidate"
+          before: "69.553444 s"
+          after: "68.771468 s"
+          verdict: accepted
+      - description: "Replace dynamic image-token index_put"
+        dimension: equivalent_substitution
+        implementation_detail: "Compared framework masked_scatter and custom cumsum/index_select/where against models/vision_language_model.py."
+        equivalence_verification:
+          method: "2-NPU output plus token/image gradient bit-exact comparison"
+          metrics:
+            - metric: max_abs_diff
+              threshold: "== 0"
+              value: "0 for both candidates"
+          result: passed
+        performance_result:
+          metric: "25-repeat forward+backward median"
+          baseline_ref: "original boolean index_put"
+          before: "0.624/0.823 ms per rank"
+          after: "masked_scatter 3.872/3.955 ms; dense gather+where 2.250/2.316 ms"
+          verdict: rejected
+        failure_reason: "Both equivalent alternatives are less hardware-friendly on this NPU; the original host attribution included asynchronous upstream wait."
+  final_state:
+    adopted: "CPU/Gloo validity synchronization; shared attention bool mask; dead NPU additive-mask removal; ordered Gloo/HCCL teardown"
+    files_modified:
+      - data/data_utils.py
+      - train.py
+      - models/language_model.py
+      - ablations/train_profile_stage2.py
+      - analysis/stage2_round1_analysis.md
+    end_to_end_before: "short wall-clock 70.168917 s; full 563.833686 s; L0 84.712026 s"
+    end_to_end_after: "short wall-clock 68.771468 s; full Job 20997 554.191518 s with FINAL_VAL_LOSS 1.08230782; L0 80.771385 s; post-metric NPU finalizer workaround validated cleanly by 16-rank/64-batch Job 21004"
+    remaining_bottleneck: "Must be recomputed from a new L1 after this round is committed; old DDP/QKV hypotheses are intentionally invalidated."
+    is_terminal: false
+  platform_findings:
+    - "L1 profiling depressed utilization by 40.4 percentage points versus L0; use L0 for bottleneck classification and L1 only for operator/call-stack evidence."
+    - "Profiler host duration around asynchronous NPU index_put overstated intrinsic cost; synchronized microbenchmark showed index_put outperformed two functional alternatives."
+    - "An auxiliary Gloo process group should be explicitly destroyed before the default HCCL group to avoid shutdown SIGABRT after long validation."
+    - "torch_npu 2.7.1.post2 may still abort during C++ static destruction after every rank reports successful communicator teardown; flushing and using os._exit(0) after all work and group destruction avoids this post-result runtime defect."
+  context:
+    hardware: "16x Ascend NPU (910B-class)"
+    cann_version: "runtime supplied by codeserver-mindspeed:v1.0.5; torch_npu 2.7.1.post2"
+    model_arch: "NanoVLM: ViT + modality projector + 32-block decoder LM"
+    input_spec: "batch 2/device, gradient accumulation 4, sequence length 4096, up to 18 images per knapsack"
+    profiling_level: "L0 + L1"
+    date: "2026-08-31"
+    notes: "Training dynamics unchanged; all performance gates use TASK_QUEUE_ENABLE=2 and CPU_AFFINITY_CONF=1."

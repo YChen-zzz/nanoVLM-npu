@@ -1,0 +1,514 @@
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0/aarch64-linux/ascend_ops_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0/aarch64-linux/ascend_ops_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+W1016 18:57:46.558000 1212746 site-packages/torch/distributed/run.py:766] 
+W1016 18:57:46.558000 1212746 site-packages/torch/distributed/run.py:766] *****************************************
+W1016 18:57:46.558000 1212746 site-packages/torch/distributed/run.py:766] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+W1016 18:57:46.558000 1212746 site-packages/torch/distributed/run.py:766] *****************************************
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0/aarch64-linux/ascend_ops_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0/aarch64-linux/ascend_ops_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0/aarch64-linux/ascend_ops_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0/aarch64-linux/ascend_ops_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0/aarch64-linux/ascend_ops_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0/aarch64-linux/ascend_ops_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0/aarch64-linux/ascend_ops_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0/aarch64-linux/ascend_ops_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0/aarch64-linux/ascend_ops_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0/aarch64-linux/ascend_ops_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0/aarch64-linux/ascend_ops_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0/aarch64-linux/ascend_ops_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0/aarch64-linux/ascend_ops_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0/aarch64-linux/ascend_ops_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0/aarch64-linux/ascend_ops_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0/aarch64-linux/ascend_ops_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0/aarch64-linux/ascend_ops_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0/aarch64-linux/ascend_ops_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0/aarch64-linux/ascend_ops_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0/aarch64-linux/ascend_ops_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0/aarch64-linux/ascend_ops_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0/aarch64-linux/ascend_ops_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0/aarch64-linux/ascend_ops_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0/aarch64-linux/ascend_ops_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0/aarch64-linux/ascend_ops_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0/aarch64-linux/ascend_ops_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0/aarch64-linux/ascend_ops_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0/aarch64-linux/ascend_ops_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0/aarch64-linux/ascend_ops_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0/aarch64-linux/ascend_ops_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0/aarch64-linux/ascend_ops_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0 owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch_npu/utils/collect_env.py:58: UserWarning: Warning: The /usr/local/Ascend/cann-8.5.0/aarch64-linux/ascend_ops_install.info owner does not match the current owner.
+  warnings.warn(f"Warning: The {path} owner does not match the current owner.")
+Getting dataloaders from HuggingFaceM4/FineVision_concat_shuffled_2
+Getting dataloaders from HuggingFaceM4/FineVision_concat_shuffled_2
+Resize to max side len: True
+Resize to max side len: True
+--- VLM Config ---
+VLMConfig(vit_hidden_dim=768, vit_inter_dim=3072, vit_patch_size=16, vit_img_size=512, vit_n_heads=12, vit_dropout=0.0, vit_n_blocks=12, vit_ln_eps=1e-06, vit_cls_flag=False, vit_model_type='../../offline_assets/models/siglip2-base-patch16-512', lm_hidden_dim=960, lm_inter_dim=2560, lm_rms_eps=1e-05, lm_re_base=100000, lm_max_position_embeddings=8192, lm_base_vocab_size=49152, extra_token_amount=66, lm_vocab_size=49218, lm_n_heads=15, lm_n_kv_heads=5, lm_dropout=0.0, lm_n_blocks=32, lm_attn_scaling=1.0, lm_max_length=4096, lm_use_tokens=False, lm_tie_weights=True, lm_model_type='../../offline_assets/models/SmolLM2-360M-Instruct', lm_tokenizer='../../offline_assets/models/SmolLM2-360M-Instruct', lm_chat_template="{% for message in messages %}{{'<|im_start|>' + message['role'] + '\n' + message['content'] + '<|im_end|>' + '\n'}}{% endfor %}{% if add_generation_prompt %}{{ '<|im_start|>assistant\n' }}{% endif %}", mp_pixel_shuffle_factor=4, mp_image_token_length=64, max_img_size=2048, resize_to_max_side_len=True, vlm_extra_tokens={'image_token': '<|image|>', 'global_image_token': '<|global_image|>', 'r1c1': '<row_1_col_1>', 'r1c2': '<row_1_col_2>', 'r1c3': '<row_1_col_3>', 'r1c4': '<row_1_col_4>', 'r1c5': '<row_1_col_5>', 'r1c6': '<row_1_col_6>', 'r1c7': '<row_1_col_7>', 'r1c8': '<row_1_col_8>', 'r2c1': '<row_2_col_1>', 'r2c2': '<row_2_col_2>', 'r2c3': '<row_2_col_3>', 'r2c4': '<row_2_col_4>', 'r2c5': '<row_2_col_5>', 'r2c6': '<row_2_col_6>', 'r2c7': '<row_2_col_7>', 'r2c8': '<row_2_col_8>', 'r3c1': '<row_3_col_1>', 'r3c2': '<row_3_col_2>', 'r3c3': '<row_3_col_3>', 'r3c4': '<row_3_col_4>', 'r3c5': '<row_3_col_5>', 'r3c6': '<row_3_col_6>', 'r3c7': '<row_3_col_7>', 'r3c8': '<row_3_col_8>', 'r4c1': '<row_4_col_1>', 'r4c2': '<row_4_col_2>', 'r4c3': '<row_4_col_3>', 'r4c4': '<row_4_col_4>', 'r4c5': '<row_4_col_5>', 'r4c6': '<row_4_col_6>', 'r4c7': '<row_4_col_7>', 'r4c8': '<row_4_col_8>', 'r5c1': '<row_5_col_1>', 'r5c2': '<row_5_col_2>', 'r5c3': '<row_5_col_3>', 'r5c4': '<row_5_col_4>', 'r5c5': '<row_5_col_5>', 'r5c6': '<row_5_col_6>', 'r5c7': '<row_5_col_7>', 'r5c8': '<row_5_col_8>', 'r6c1': '<row_6_col_1>', 'r6c2': '<row_6_col_2>', 'r6c3': '<row_6_col_3>', 'r6c4': '<row_6_col_4>', 'r6c5': '<row_6_col_5>', 'r6c6': '<row_6_col_6>', 'r6c7': '<row_6_col_7>', 'r6c8': '<row_6_col_8>', 'r7c1': '<row_7_col_1>', 'r7c2': '<row_7_col_2>', 'r7c3': '<row_7_col_3>', 'r7c4': '<row_7_col_4>', 'r7c5': '<row_7_col_5>', 'r7c6': '<row_7_col_6>', 'r7c7': '<row_7_col_7>', 'r7c8': '<row_7_col_8>', 'r8c1': '<row_8_col_1>', 'r8c2': '<row_8_col_2>', 'r8c3': '<row_8_col_3>', 'r8c4': '<row_8_col_4>', 'r8c5': '<row_8_col_5>', 'r8c6': '<row_8_col_6>', 'r8c7': '<row_8_col_7>', 'r8c8': '<row_8_col_8>'}, vlm_load_backbone_weights=True, vlm_checkpoint_path='checkpoints', hf_repo_name='nanoVLM')
+--- Train Config ---
+TrainConfig(lr_mp=0.00512, lr_vision_backbone=5e-05, lr_language_backbone=5e-05, val_size=50000, batch_size=2, gradient_accumulation_steps=4, max_grad_norm=1.0, eval_in_epochs=False, eval_interval=500, stats_log_interval=50, max_training_steps=210, max_images_per_example=4, max_images_per_knapsack=18, max_sample_length=4096, compile=False, resume_from_vlm_checkpoint=False, train_dataset_path='HuggingFaceM4/FineVision_concat_shuffled_2', train_dataset_name=('default',), stream_dataset=True, relevance_min_rating=1, image_correspondence_min_rating=1, visual_dependency_min_rating=1, formatting_min_rating=1, wandb_entity='HuggingFace', log_wandb=False, use_lmms_eval=False, lmms_eval_tasks='mmstar,mmmu_val,ocrbench,textvqa_val,docvqa_val,scienceqa,mme,infovqa_val,chartqa', lmms_eval_limit=None, lmms_eval_batch_size=64)
+Getting dataloaders from HuggingFaceM4/FineVision_concat_shuffled_2
+Resize to max side len: True
+Getting dataloaders from HuggingFaceM4/FineVision_concat_shuffled_2Getting dataloaders from HuggingFaceM4/FineVision_concat_shuffled_2
+
+Getting dataloaders from HuggingFaceM4/FineVision_concat_shuffled_2
+Resize to max side len: True
+Getting dataloaders from HuggingFaceM4/FineVision_concat_shuffled_2
+Resize to max side len: TrueResize to max side len: True
+
+Getting dataloaders from HuggingFaceM4/FineVision_concat_shuffled_2
+Getting dataloaders from HuggingFaceM4/FineVision_concat_shuffled_2
+Resize to max side len: True
+Getting dataloaders from HuggingFaceM4/FineVision_concat_shuffled_2
+Resize to max side len: True
+Resize to max side len: True
+Getting dataloaders from HuggingFaceM4/FineVision_concat_shuffled_2
+Resize to max side len: True
+Resize to max side len: True
+Getting dataloaders from HuggingFaceM4/FineVision_concat_shuffled_2
+Resize to max side len: True
+Getting dataloaders from HuggingFaceM4/FineVision_concat_shuffled_2
+Getting dataloaders from HuggingFaceM4/FineVision_concat_shuffled_2
+Getting dataloaders from HuggingFaceM4/FineVision_concat_shuffled_2
+Getting dataloaders from HuggingFaceM4/FineVision_concat_shuffled_2
+Resize to max side len: True
+Resize to max side len: True
+Resize to max side len: True
+Resize to max side len: True
+Loading dataset: default
+Loading dataset: default
+Loading dataset: default
+Loading dataset: default
+Loading dataset: default
+Loading dataset: default
+Loading dataset: defaultLoading dataset: default
+
+Loading dataset: default
+Loading dataset: default
+Loading dataset: default
+Loading dataset: default
+Loading dataset: default
+Loading dataset: default
+Loading dataset: default
+Loading dataset: default
+Val size per GPU: 3125
+Val size per GPU: 3125
+Warming up dataloaders...
+Warming up dataloaders...
+Val size per GPU: 3125
+Warming up dataloaders...
+Val size per GPU: 3125
+Warming up dataloaders...
+Val size per GPU: 3125
+Warming up dataloaders...
+Val size per GPU: 3125
+Val size per GPU: 3125
+Warming up dataloaders...
+Warming up dataloaders...
+Val size per GPU: 3125
+Val size per GPU: 3125
+Warming up dataloaders...
+Warming up dataloaders...
+Val size per GPU: 3125
+Warming up dataloaders...
+Val size per GPU: 3125
+Warming up dataloaders...
+Val size per GPU: 3125
+Val size per GPU: 3125
+Val size per GPU: 3125
+Warming up dataloaders...
+Warming up dataloaders...
+Warming up dataloaders...
+Val size per GPU: 3125
+Val size per GPU: 3125
+Warming up dataloaders...
+Warming up dataloaders...
+Token indices sequence length is longer than the specified maximum sequence length for this model (8196 > 8192). Running this sequence through the model will result in indexing errors
+Token indices sequence length is longer than the specified maximum sequence length for this model (9942 > 8192). Running this sequence through the model will result in indexing errors
+Token indices sequence length is longer than the specified maximum sequence length for this model (8196 > 8192). Running this sequence through the model will result in indexing errors
+Token indices sequence length is longer than the specified maximum sequence length for this model (9573 > 8192). Running this sequence through the model will result in indexing errors
+Token indices sequence length is longer than the specified maximum sequence length for this model (8452 > 8192). Running this sequence through the model will result in indexing errors
+Token indices sequence length is longer than the specified maximum sequence length for this model (8283 > 8192). Running this sequence through the model will result in indexing errors
+Token indices sequence length is longer than the specified maximum sequence length for this model (11128 > 8192). Running this sequence through the model will result in indexing errors
+Token indices sequence length is longer than the specified maximum sequence length for this model (11251 > 8192). Running this sequence through the model will result in indexing errors
+Token indices sequence length is longer than the specified maximum sequence length for this model (8371 > 8192). Running this sequence through the model will result in indexing errors
+Token indices sequence length is longer than the specified maximum sequence length for this model (8455 > 8192). Running this sequence through the model will result in indexing errors
+Token indices sequence length is longer than the specified maximum sequence length for this model (12969 > 8192). Running this sequence through the model will result in indexing errors
+Warmup complete.
+Rank 10 Waiting for all workers to get dataloaders...
+Warmup complete.
+Rank 12 Waiting for all workers to get dataloaders...
+Warmup complete.
+Rank 13 Waiting for all workers to get dataloaders...
+Token indices sequence length is longer than the specified maximum sequence length for this model (14323 > 8192). Running this sequence through the model will result in indexing errors
+Warmup complete.
+Rank 3 Waiting for all workers to get dataloaders...
+Warmup complete.
+Rank 7 Waiting for all workers to get dataloaders...
+Warmup complete.
+Rank 14 Waiting for all workers to get dataloaders...
+Warmup complete.
+Rank 8 Waiting for all workers to get dataloaders...
+Warmup complete.
+Rank 6 Waiting for all workers to get dataloaders...
+Warmup complete.
+Rank 9 Waiting for all workers to get dataloaders...
+Warmup complete.
+Rank 2 Waiting for all workers to get dataloaders...
+Warmup complete.
+Rank 0 Waiting for all workers to get dataloaders...
+Waiting for all workers to get dataloaders...
+Token indices sequence length is longer than the specified maximum sequence length for this model (8528 > 8192). Running this sequence through the model will result in indexing errors
+Warmup complete.
+Rank 5 Waiting for all workers to get dataloaders...
+Token indices sequence length is longer than the specified maximum sequence length for this model (9282 > 8192). Running this sequence through the model will result in indexing errors
+Warmup complete.
+Rank 1 Waiting for all workers to get dataloaders...
+Warmup complete.
+Rank 11 Waiting for all workers to get dataloaders...
+Token indices sequence length is longer than the specified maximum sequence length for this model (13093 > 8192). Running this sequence through the model will result in indexing errors
+Warmup complete.
+Rank 15 Waiting for all workers to get dataloaders...
+Token indices sequence length is longer than the specified maximum sequence length for this model (8842 > 8192). Running this sequence through the model will result in indexing errors
+Warmup complete.
+Rank 4 Waiting for all workers to get dataloaders...
+Token indices sequence length is longer than the specified maximum sequence length for this model (15285 > 8192). Running this sequence through the model will result in indexing errors
+Token indices sequence length is longer than the specified maximum sequence length for this model (8670 > 8192). Running this sequence through the model will result in indexing errors
+Token indices sequence length is longer than the specified maximum sequence length for this model (11077 > 8192). Running this sequence through the model will result in indexing errors
+All workers have gotten dataloaders.
+Loading from backbone weights
+Loading from backbone weights
+Loading from backbone weights
+Loading from backbone weightsLoading from backbone weights
+Loading from backbone weightsLoading from backbone weights
+
+Loading from backbone weights
+Loading from backbone weights
+Loading from backbone weights
+
+Loading from backbone weights
+Loading from backbone weights
+Token indices sequence length is longer than the specified maximum sequence length for this model (10156 > 8192). Running this sequence through the model will result in indexing errors
+Token indices sequence length is longer than the specified maximum sequence length for this model (8455 > 8192). Running this sequence through the model will result in indexing errors
+Token indices sequence length is longer than the specified maximum sequence length for this model (11526 > 8192). Running this sequence through the model will result in indexing errors
+Token indices sequence length is longer than the specified maximum sequence length for this model (8557 > 8192). Running this sequence through the model will result in indexing errors
+Loading from backbone weights
+Loading from backbone weights
+Loading from backbone weights
+Token indices sequence length is longer than the specified maximum sequence length for this model (9179 > 8192). Running this sequence through the model will result in indexing errors
+Loading from backbone weights
+Successfully loaded ../../offline_assets/models/siglip2-base-patch16-512 weights from safetensors. Model has 86,433,024 parameters.
+Successfully loaded ../../offline_assets/models/siglip2-base-patch16-512 weights from safetensors. Model has 86,433,024 parameters.
+Successfully loaded ../../offline_assets/models/siglip2-base-patch16-512 weights from safetensors. Model has 86,433,024 parameters.
+Successfully loaded ../../offline_assets/models/siglip2-base-patch16-512 weights from safetensors. Model has 86,433,024 parameters.
+Successfully loaded ../../offline_assets/models/siglip2-base-patch16-512 weights from safetensors. Model has 86,433,024 parameters.
+Successfully loaded ../../offline_assets/models/siglip2-base-patch16-512 weights from safetensors. Model has 86,433,024 parameters.
+Successfully loaded ../../offline_assets/models/siglip2-base-patch16-512 weights from safetensors. Model has 86,433,024 parameters.
+Successfully loaded ../../offline_assets/models/siglip2-base-patch16-512 weights from safetensors. Model has 86,433,024 parameters.
+Successfully loaded ../../offline_assets/models/siglip2-base-patch16-512 weights from safetensors. Model has 86,433,024 parameters.
+Successfully loaded ../../offline_assets/models/siglip2-base-patch16-512 weights from safetensors. Model has 86,433,024 parameters.
+Successfully loaded ../../offline_assets/models/siglip2-base-patch16-512 weights from safetensors. Model has 86,433,024 parameters.
+Successfully loaded ../../offline_assets/models/siglip2-base-patch16-512 weights from safetensors. Model has 86,433,024 parameters.
+Token indices sequence length is longer than the specified maximum sequence length for this model (11693 > 8192). Running this sequence through the model will result in indexing errors
+Successfully loaded ../../offline_assets/models/siglip2-base-patch16-512 weights from safetensors. Model has 86,433,024 parameters.
+Successfully loaded ../../offline_assets/models/siglip2-base-patch16-512 weights from safetensors. Model has 86,433,024 parameters.
+Successfully loaded ../../offline_assets/models/siglip2-base-patch16-512 weights from safetensors. Model has 86,433,024 parameters.
+Token indices sequence length is longer than the specified maximum sequence length for this model (8294 > 8192). Running this sequence through the model will result in indexing errors
+Successfully loaded ../../offline_assets/models/siglip2-base-patch16-512 weights from safetensors. Model has 86,433,024 parameters.
+Extending token embeddings from torch.Size([49152, 960]) to torch.Size([49218, 960])
+Initialized 66 new token embeddings
+Extending token embeddings from torch.Size([49152, 960]) to torch.Size([49218, 960])
+Initialized 66 new token embeddings
+Successfully loaded ../../offline_assets/models/SmolLM2-360M-Instruct weights from safetensors. Model has 361,884,480 parameters.
+Extending token embeddings from torch.Size([49152, 960]) to torch.Size([49218, 960])
+Extending token embeddings from torch.Size([49152, 960]) to torch.Size([49218, 960])
+Extending token embeddings from torch.Size([49152, 960]) to torch.Size([49218, 960])
+Initialized 66 new token embeddings
+Initialized 66 new token embeddings
+Initialized 66 new token embeddings
+Extending token embeddings from torch.Size([49152, 960]) to torch.Size([49218, 960])
+Initialized 66 new token embeddings
+Extending token embeddings from torch.Size([49152, 960]) to torch.Size([49218, 960])
+Initialized 66 new token embeddings
+Using device: npu
+Successfully loaded ../../offline_assets/models/SmolLM2-360M-Instruct weights from safetensors. Model has 361,884,480 parameters.
+Successfully loaded ../../offline_assets/models/SmolLM2-360M-Instruct weights from safetensors. Model has 361,884,480 parameters.
+Successfully loaded ../../offline_assets/models/SmolLM2-360M-Instruct weights from safetensors. Model has 361,884,480 parameters.
+Successfully loaded ../../offline_assets/models/SmolLM2-360M-Instruct weights from safetensors. Model has 361,884,480 parameters.
+Successfully loaded ../../offline_assets/models/SmolLM2-360M-Instruct weights from safetensors. Model has 361,884,480 parameters.
+Successfully loaded ../../offline_assets/models/SmolLM2-360M-Instruct weights from safetensors. Model has 361,884,480 parameters.
+Extending token embeddings from torch.Size([49152, 960]) to torch.Size([49218, 960])
+Initialized 66 new token embeddings
+Wrapping model for DDP
+[rank9]:[W1016 18:58:23.645960939 compiler_depend.ts:338] Warning: Cannot create tensor with interal format while allow_internel_format=False, tensor will be created with base format. (function operator())
+Using device: npu
+Using device: npu
+Using device: npu
+Using device: npu
+Using device: npu
+Using device: npu
+Extending token embeddings from torch.Size([49152, 960]) to torch.Size([49218, 960])
+Initialized 66 new token embeddings
+Successfully loaded ../../offline_assets/models/SmolLM2-360M-Instruct weights from safetensors. Model has 361,884,480 parameters.
+Wrapping model for DDP
+Wrapping model for DDP
+Wrapping model for DDP
+[rank8]:[W1016 18:58:23.882780499 compiler_depend.ts:338] Warning: Cannot create tensor with interal format while allow_internel_format=False, tensor will be created with base format. (function operator())
+[rank12]:[W1016 18:58:23.884800059 compiler_depend.ts:338] Warning: Cannot create tensor with interal format while allow_internel_format=False, tensor will be created with base format. (function operator())
+[rank14]:[W1016 18:58:23.889844549 compiler_depend.ts:338] Warning: Cannot create tensor with interal format while allow_internel_format=False, tensor will be created with base format. (function operator())
+Wrapping model for DDP
+[rank4]:[W1016 18:58:23.898861709 compiler_depend.ts:338] Warning: Cannot create tensor with interal format while allow_internel_format=False, tensor will be created with base format. (function operator())
+Wrapping model for DDP
+[rank6]:[W1016 18:58:23.924929009 compiler_depend.ts:338] Warning: Cannot create tensor with interal format while allow_internel_format=False, tensor will be created with base format. (function operator())
+Extending token embeddings from torch.Size([49152, 960]) to torch.Size([49218, 960])
+Initialized 66 new token embeddings
+Wrapping model for DDP
+Successfully loaded ../../offline_assets/models/SmolLM2-360M-Instruct weights from safetensors. Model has 361,884,480 parameters.
+[rank10]:[W1016 18:58:23.013143759 compiler_depend.ts:338] Warning: Cannot create tensor with interal format while allow_internel_format=False, tensor will be created with base format. (function operator())
+Using device: npu
+Successfully loaded ../../offline_assets/models/SmolLM2-360M-Instruct weights from safetensors. Model has 361,884,480 parameters.
+Wrapping model for DDP
+[rank3]:[W1016 18:58:23.219472359 compiler_depend.ts:338] Warning: Cannot create tensor with interal format while allow_internel_format=False, tensor will be created with base format. (function operator())
+Using device: npu
+Extending token embeddings from torch.Size([49152, 960]) to torch.Size([49218, 960])
+Initialized 66 new token embeddings
+Extending token embeddings from torch.Size([49152, 960]) to torch.Size([49218, 960])
+Initialized 66 new token embeddings
+Using device: npu
+Extending token embeddings from torch.Size([49152, 960]) to torch.Size([49218, 960])
+Initialized 66 new token embeddings
+Wrapping model for DDP
+[rank13]:[W1016 18:58:24.428472129 compiler_depend.ts:338] Warning: Cannot create tensor with interal format while allow_internel_format=False, tensor will be created with base format. (function operator())
+Successfully loaded ../../offline_assets/models/SmolLM2-360M-Instruct weights from safetensors. Model has 361,884,480 parameters.
+Successfully loaded ../../offline_assets/models/SmolLM2-360M-Instruct weights from safetensors. Model has 361,884,480 parameters.
+Wrapping model for DDP
+[rank2]:[W1016 18:58:24.585364239 compiler_depend.ts:338] Warning: Cannot create tensor with interal format while allow_internel_format=False, tensor will be created with base format. (function operator())
+Successfully loaded ../../offline_assets/models/SmolLM2-360M-Instruct weights from safetensors. Model has 361,884,480 parameters.
+Using device: npu
+Using device: npu
+Extending token embeddings from torch.Size([49152, 960]) to torch.Size([49218, 960])
+Initialized 66 new token embeddings
+Using device: npu
+Wrapping model for DDP
+[rank1]:[W1016 18:58:24.958802049 compiler_depend.ts:338] Warning: Cannot create tensor with interal format while allow_internel_format=False, tensor will be created with base format. (function operator())
+Wrapping model for DDP
+[rank7]:[W1016 18:58:24.990145509 compiler_depend.ts:338] Warning: Cannot create tensor with interal format while allow_internel_format=False, tensor will be created with base format. (function operator())
+Successfully loaded ../../offline_assets/models/SmolLM2-360M-Instruct weights from safetensors. Model has 361,884,480 parameters.
+Wrapping model for DDP
+Extending token embeddings from torch.Size([49152, 960]) to torch.Size([49218, 960])
+[rank5]:[W1016 18:58:24.124142489 compiler_depend.ts:338] Warning: Cannot create tensor with interal format while allow_internel_format=False, tensor will be created with base format. (function operator())
+Initialized 66 new token embeddings
+Using device: npu
+Successfully loaded ../../offline_assets/models/SmolLM2-360M-Instruct weights from safetensors. Model has 361,884,480 parameters.
+Extending token embeddings from torch.Size([49152, 960]) to torch.Size([49218, 960])
+Initialized 66 new token embeddings
+Wrapping model for DDP
+nanoVLM initialized with 460,113,984 parameters
+Training summary (global): -16 samples, batch size 128, training on 16 GPUs
+Training summary per GPU: batch size 2
+Validation summary (global): -16 samples, batch size 128, training on 16 GPUs
+Validation summary per GPU: batch size 2
+[rank15]:[W1016 18:58:25.598112919 compiler_depend.ts:338] Warning: Cannot create tensor with interal format while allow_internel_format=False, tensor will be created with base format. (function operator())
+Using device: npu
+Successfully loaded ../../offline_assets/models/SmolLM2-360M-Instruct weights from safetensors. Model has 361,884,480 parameters.
+NPU mode: gradient_checkpointing=False, using npu_fusion_attention
+Wrapping model for DDP
+[rank0]:[W1016 18:58:25.795449109 compiler_depend.ts:338] Warning: Cannot create tensor with interal format while allow_internel_format=False, tensor will be created with base format. (function operator())
+Using device: npu
+Wrapping model for DDP
+[rank11]:[W1016 18:58:25.161726379 compiler_depend.ts:338] Warning: Cannot create tensor with interal format while allow_internel_format=False, tensor will be created with base format. (function operator())
+Model wrapped for DDP
+Model wrapped for DDP
+Model wrapped for DDP
+Model wrapped for DDP
+Model wrapped for DDP
+Model wrapped for DDP
+Model wrapped for DDP
+Model wrapped for DDP
+Model wrapped for DDP
+Model wrapped for DDP
+Model wrapped for DDP
+Model wrapped for DDP
+Model wrapped for DDP
+Model wrapped for DDP
+Model wrapped for DDP
+Model wrapped for DDP
+Starting training loop
+Starting training loop
+Starting training loop
+Starting training loop
+Starting training loop
+Starting training loopStarting training loop
+Starting training loop
+
+Starting training loop
+Starting training loop
+Starting training loop
+Starting training loop
+Starting training loop
+Starting training loop
+Starting training loop
+Starting training loop
+Token indices sequence length is longer than the specified maximum sequence length for this model (11578 > 8192). Running this sequence through the model will result in indexing errors
+Token indices sequence length is longer than the specified maximum sequence length for this model (29242 > 8192). Running this sequence through the model will result in indexing errors
+Token indices sequence length is longer than the specified maximum sequence length for this model (8345 > 8192). Running this sequence through the model will result in indexing errors
+Token indices sequence length is longer than the specified maximum sequence length for this model (13196 > 8192). Running this sequence through the model will result in indexing errors
+BENCH_WARMUP case=eager steps=10 elapsed_s=31.319906
+Token indices sequence length is longer than the specified maximum sequence length for this model (10531 > 8192). Running this sequence through the model will result in indexing errors
+Epoch: 1, Step: 196/210, Train Loss: 1.1384 | Time: 490.89s | T/s: 122078.24
+Starting training loop
+Starting training loop
+Starting training loop
+Starting training loop
+Starting training loop
+Starting training loop
+Starting training loop
+Starting training loop
+Starting training loop
+Starting training loop
+Starting training loop
+Starting training loop
+Starting training loop
+Starting training loop
+Starting training loop
+Starting training loop
+Token indices sequence length is longer than the specified maximum sequence length for this model (8196 > 8192). Running this sequence through the model will result in indexing errors
+Epoch: 2, Step: 210/210, Train Loss: 1.0946 | Time: 40.85s | T/s: 104417.18
+BENCH_MEASURE case=eager steps=200 microbatches=800 elapsed_s=500.434265 train_loss=1.11560432
+Token indices sequence length is longer than the specified maximum sequence length for this model (8196 > 8192). Running this sequence through the model will result in indexing errors
+Token indices sequence length is longer than the specified maximum sequence length for this model (11508 > 8192). Running this sequence through the model will result in indexing errors
+FINAL_VAL_LOSS value=1.08362198 batches_per_rank=64
+Average time per epoch: 265.87s
+Average time per sample: 0.0198s
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py:4631: UserWarning: No device id is provided via `init_process_group` or `barrier `. Using the current device set by the user. 
+  warnings.warn(  # warn only once
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py:4631: UserWarning: No device id is provided via `init_process_group` or `barrier `. Using the current device set by the user. 
+  warnings.warn(  # warn only once
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py:4631: UserWarning: No device id is provided via `init_process_group` or `barrier `. Using the current device set by the user. 
+  warnings.warn(  # warn only once
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py:4631: UserWarning: No device id is provided via `init_process_group` or `barrier `. Using the current device set by the user. 
+  warnings.warn(  # warn only once
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py:4631: UserWarning: No device id is provided via `init_process_group` or `barrier `. Using the current device set by the user. 
+  warnings.warn(  # warn only once
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py:4631: UserWarning: No device id is provided via `init_process_group` or `barrier `. Using the current device set by the user. 
+  warnings.warn(  # warn only once
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py:4631: UserWarning: No device id is provided via `init_process_group` or `barrier `. Using the current device set by the user. 
+  warnings.warn(  # warn only once
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py:4631: UserWarning: No device id is provided via `init_process_group` or `barrier `. Using the current device set by the user. 
+  warnings.warn(  # warn only once
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py:4631: UserWarning: No device id is provided via `init_process_group` or `barrier `. Using the current device set by the user. 
+  warnings.warn(  # warn only once
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py:4631: UserWarning: No device id is provided via `init_process_group` or `barrier `. Using the current device set by the user. 
+  warnings.warn(  # warn only once
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py:4631: UserWarning: No device id is provided via `init_process_group` or `barrier `. Using the current device set by the user. 
+  warnings.warn(  # warn only once
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py:4631: UserWarning: No device id is provided via `init_process_group` or `barrier `. Using the current device set by the user. 
+  warnings.warn(  # warn only once
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py:4631: UserWarning: No device id is provided via `init_process_group` or `barrier `. Using the current device set by the user. 
+  warnings.warn(  # warn only once
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py:4631: UserWarning: No device id is provided via `init_process_group` or `barrier `. Using the current device set by the user. 
+  warnings.warn(  # warn only once
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py:4631: UserWarning: No device id is provided via `init_process_group` or `barrier `. Using the current device set by the user. 
+  warnings.warn(  # warn only once
+/SharePath/chenyupeng/cyp-testtest/llm_test_migrated/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py:4631: UserWarning: No device id is provided via `init_process_group` or `barrier `. Using the current device set by the user. 
+  warnings.warn(  # warn only once
+MIGRATION_EXIT_CODE=0

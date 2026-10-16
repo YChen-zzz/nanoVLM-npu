@@ -1,0 +1,110 @@
+diff --git a/ablations/train_profile_stage2.py b/ablations/train_profile_stage2.py
+index b9a0cfc..8ee73f6 100644
+--- a/ablations/train_profile_stage2.py
++++ b/ablations/train_profile_stage2.py
+@@ -524,7 +524,9 @@ def train(train_cfg, vlm_cfg):
+         data_load_start = time.time()
+
+         print("Starting training loop")
+-        for i, batch in enumerate(synchronized_dataloader_step(iter_train_loader, is_dist())):
++        for i, batch in enumerate(synchronized_dataloader_step(
++            iter_train_loader, is_dist(), process_group=PG_CPU if _USE_NPU else None
++        )):
+             is_update_step = (i + 1) % train_cfg.gradient_accumulation_steps == 0
+             if benchmark_case and device.type in ("cuda", "npu"):
+                 _accelerator_synchronize()
+@@ -645,7 +647,9 @@ def train(train_cfg, vlm_cfg):
+                 with torch.no_grad():
+                     total_val_loss = 0
+                     val_batches = 0
+-                    for batch in synchronized_dataloader_step(iter_val_loader, is_dist()):
++                    for batch in synchronized_dataloader_step(
++                        iter_val_loader, is_dist(), process_group=PG_CPU if _USE_NPU else None
++                    ):
+                         if val_batches > 64:
+                             print(f"Evaluated {val_batches} batches")
+                             break
+@@ -852,7 +856,9 @@ def train(train_cfg, vlm_cfg):
+         total_val_loss = 0.0
+         val_batches = 0
+         with torch.no_grad():
+-            for batch in synchronized_dataloader_step(iter(val_loader), is_dist()):
++            for batch in synchronized_dataloader_step(
++                iter(val_loader), is_dist(), process_group=PG_CPU if _USE_NPU else None
++            ):
+                 if val_batches >= 64:
+                     break
+                 images = batch["images"]
+diff --git a/data/data_utils.py b/data/data_utils.py
+index 0b2f2ed..6ea0453 100644
+--- a/data/data_utils.py
++++ b/data/data_utils.py
+@@ -34,7 +34,7 @@ def _is_batch_valid(batch):
+     return True
+
+
+-def synchronized_dataloader_step(train_loader, is_dist):
++def synchronized_dataloader_step(train_loader, is_dist, process_group=None):
+     """
+     Create a synchronized iterator that handles uneven data distribution in DDP.
+     All ranks will stop when the first rank runs out of data.
+@@ -61,13 +61,19 @@ def synchronized_dataloader_step(train_loader, is_dist):
+             while not is_valid:
+                 batch = next(train_iter)
+                 is_valid = _is_batch_valid(batch)
+-            has_data = torch.tensor(1, device=_get_current_device())
++            has_data_value = 1
+         except StopIteration:
+             batch = None
+-            has_data = torch.tensor(0, device=_get_current_device())
++            has_data_value = 0
++
++        # Keep this control-plane collective off the NPU stream when a CPU
++        # process group is available. The MIN result and stop semantics are
++        # unchanged, while the following .item() no longer drains NPU work.
++        sync_device = "cpu" if process_group is not None else _get_current_device()
++        has_data = torch.tensor(has_data_value, device=sync_device)
+
+         # We synchronize across all ranks. If any rank is out of data, all ranks stop.
+-        dist.all_reduce(has_data, op=dist.ReduceOp.MIN)
++        dist.all_reduce(has_data, op=dist.ReduceOp.MIN, group=process_group)
+
+         if has_data.item() == 0:
+             # At least one rank is out of data. All ranks should stop.
+diff --git a/train.py b/train.py
+index fbce0c7..63844f6 100644
+--- a/train.py
++++ b/train.py
+@@ -482,7 +482,9 @@ def train(train_cfg, vlm_cfg):
+         data_load_start = time.time()
+
+         print("Starting training loop")
+-        for i, batch in enumerate(synchronized_dataloader_step(iter_train_loader, is_dist())):
++        for i, batch in enumerate(synchronized_dataloader_step(
++            iter_train_loader, is_dist(), process_group=PG_CPU if _USE_NPU else None
++        )):
+             is_update_step = (i + 1) % train_cfg.gradient_accumulation_steps == 0
+             if benchmark_case and device.type in ("cuda", "npu"):
+                 _accelerator_synchronize()
+@@ -601,7 +603,9 @@ def train(train_cfg, vlm_cfg):
+                 with torch.no_grad():
+                     total_val_loss = 0
+                     val_batches = 0
+-                    for batch in synchronized_dataloader_step(iter_val_loader, is_dist()):
++                    for batch in synchronized_dataloader_step(
++                        iter_val_loader, is_dist(), process_group=PG_CPU if _USE_NPU else None
++                    ):
+                         if val_batches > 64:
+                             print(f"Evaluated {val_batches} batches")
+                             break
+@@ -800,7 +804,9 @@ def train(train_cfg, vlm_cfg):
+         total_val_loss = 0.0
+         val_batches = 0
+         with torch.no_grad():
+-            for batch in synchronized_dataloader_step(iter(val_loader), is_dist()):
++            for batch in synchronized_dataloader_step(
++                iter(val_loader), is_dist(), process_group=PG_CPU if _USE_NPU else None
++            ):
+                 if val_batches >= 64:
+                     break
+                 images = batch["images"]

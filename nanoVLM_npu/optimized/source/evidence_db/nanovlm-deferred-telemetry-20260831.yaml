@@ -1,0 +1,142 @@
+- id: nanovlm-deferred-telemetry-20260831
+  depends_on:
+    - nanovlm-sync-mask-20260831
+  phenomenon:
+    signals:
+      - source: "Round-2 L1 trace_view call stacks"
+        content: "models/vision_language_model.py boolean index write took 66.5/70.9/75.5 ms for three calls; total host duration 214.47 ms"
+      - source: "Round-2 L1 API statistics"
+        content: "synchronization APIs totaled 743.3 ms; benchmark loop contained per-microbatch synchronize and scalar readback"
+      - source: "Round-2 L0/L1 cross-check"
+        content: "L0 Computing/Free/Communication 1590.3/181.1/494.8 ms and 89.8% utilization; L1 utilization 57.4%, a 32.4 percentage-point profiler-artifact gap"
+      - source: "Round-2 all-rank step traces"
+        content: "Computing ranged 1380.4-1823.8 ms (443.4 ms spread); image counts ranged 22-60 per microbatch"
+    raw_context: "The dynamic index operation was a queue-drain point rather than an intrinsically slow kernel. Removing one drain exposed the next scalar synchronization."
+  analysis_path:
+    profiling_ref: "profiling/20260831_043053_l1; profiling/20260831_030726_l0; profiling/20260831_064059_l0"
+    steps:
+      - action: "Cross-check fresh Round-2 L1 with the previous L0 and trace every DEFINITE/WARNING to project source"
+        observation: "True exposed host ceiling was L0 Free 181.1 ms, while L1 Free was profiler-inflated to 1184.7 ms."
+        reasoning: "Use L0 for bottleneck classification and L1 only for operator/call-stack localization."
+      - action: "Ablate framework masked_scatter, C2-only, and custom dense gather/where"
+        observation: "69.095788 s, 68.410410 s, and 68.047145 s respectively versus 68.771468 s."
+        reasoning: "The framework substitute regressed; the required custom substitute recovered a small end-to-end gain despite slower isolated kernels."
+      - action: "Defer loss scalar readback to one epoch-boundary transfer"
+        observation: "Short wall clock fell from 68.047145 s to 62.977993 s."
+        reasoning: "Per-microbatch loss.item() was the next queue-drain point after other telemetry barriers were removed."
+      - action: "Pipeline the CPU/Gloo validity MIN"
+        observation: "Two-rank semantics were exact, but short wall clock regressed from 62.977993 s to 63.090434 s."
+        reasoning: "The remaining CPU collective was already mostly hidden; extra prefetch/pipeline work did not improve end to end."
+  root_cause:
+    description: "No-W&B benchmark telemetry repeatedly drained the asynchronous NPU queue. Dynamic image-token replacement exposed another queue boundary; a custom dense expression avoided it with less overhead than masked_scatter."
+    bottleneck_type: Host-Bound
+    evidence: "Fresh L1 call stacks, L0 Free-time ceiling, bit-exact probes, and isolated 16-NPU A/B jobs 21053/21054/21069/21070/21080/21086."
+  optimization:
+    attempts:
+      - description: "Framework masked_scatter image-token replacement"
+        dimension: equivalent_substitution
+        implementation_detail: "models/vision_language_model.py expands the boolean mask and calls torch.masked_scatter."
+        equivalence_verification:
+          method: "2-NPU output and token/image-gradient comparison"
+          metrics:
+            - metric: max_abs_diff
+              threshold: "== 0"
+              value: "output=0, token_grad=0, image_grad=0"
+          result: passed
+        performance_result:
+          metric: "16-NPU 25-step/100-microbatch wall clock"
+          baseline_ref: "Round-1 accepted short"
+          before: "68.771468 s"
+          after: "69.095788 s"
+          verdict: rejected
+        failure_reason: "Framework masked_scatter cost outweighed the removed queue drain (+0.47%)."
+      - description: "Custom dense cumsum/index_select/where image-token replacement"
+        dimension: equivalent_substitution
+        implementation_detail: "models/vision_language_model.py maps each token position to its row-major image source slot and selects with torch.where."
+        equivalence_verification:
+          method: "2-NPU output and token/image-gradient comparison"
+          metrics:
+            - metric: max_abs_diff
+              threshold: "== 0"
+              value: "output=0, token_grad=0, image_grad=0"
+          result: passed
+        performance_result:
+          metric: "16-NPU 25-step/100-microbatch wall clock"
+          baseline_ref: "C2-only"
+          before: "68.410410 s"
+          after: "68.047145 s"
+          verdict: accepted
+      - description: "Remove no-W&B benchmark telemetry barriers and use a host-known RoPE bound"
+        dimension: eliminate_redundancy
+        implementation_detail: "train.py skips detailed timing synchronizes, device token-count readback, BENCH_STEP emission, unused stats object collectives, and unused scalar HCCL loss reduction; models/language_model.py passes start_pos + T_curr as a Python integer."
+        equivalence_verification:
+          method: "Three NPU RoPE boundary cases plus source-path audit"
+          metrics:
+            - metric: max_abs_diff
+              threshold: "== 0"
+              value: "cos=0 and sin=0 for all cases"
+          result: passed
+        performance_result:
+          metric: "16-NPU 25-step/100-microbatch wall clock"
+          baseline_ref: "Round-1 accepted short"
+          before: "68.771468 s"
+          after: "68.410410 s"
+          verdict: accepted
+      - description: "Batch loss scalar readback at epoch boundary"
+        dimension: hide_latency
+        implementation_detail: "train.py and ablations/train_profile_stage2.py retain detached scalar losses, transfer once at epoch end, then apply the original accumulation factor and Python summation order."
+        equivalence_verification:
+          method: "Reporting-only dataflow audit plus full 210-step training and final validation"
+          metrics:
+            - metric: final_val_loss
+              threshold: "1.08 +/- 0.01"
+              value: "1.08257675"
+          result: passed
+        performance_result:
+          metric: "16-NPU full BENCH_MEASURE"
+          baseline_ref: "Round-1 accepted full"
+          before: "554.191518 s"
+          after: "500.507781 s"
+          verdict: accepted
+      - description: "Pipeline next-batch CPU/Gloo validity reduction"
+        dimension: hide_latency
+        implementation_detail: "data/data_utils.py prefetches the next valid batch and launches async Gloo MIN before yielding the current batch."
+        equivalence_verification:
+          method: "Two-rank invalid-batch and uneven-exhaustion sequence test"
+          metrics:
+            - metric: match_rate
+              threshold: "100%"
+              value: "100%; rank0 [10,11], rank1 [20,21]"
+          result: passed
+        performance_result:
+          metric: "16-NPU 25-step/100-microbatch wall clock"
+          baseline_ref: "accepted deferred-readback variant"
+          before: "62.977993 s"
+          after: "63.090434 s"
+          verdict: rejected
+        failure_reason: "The Gloo validity reduction was already hidden; pipeline overhead caused a 0.18% regression."
+  final_state:
+    adopted: "custom dense image-token replacement; host-known RoPE maximum; no-W&B telemetry pruning; epoch-boundary batched loss readback"
+    files_modified:
+      - models/vision_language_model.py
+      - models/language_model.py
+      - train.py
+      - ablations/train_profile_stage2.py
+      - analysis/stage2_round2_analysis.md
+    end_to_end_before: "Round-1 short 68.771468 s; Round-1 full 554.191518 s; initial Stage-1 full 563.833686 s"
+    end_to_end_after: "short 62.977993 s; full 500.507781 s; FINAL_VAL_LOSS 1.08257675; Phase-4 L0 76.585270 s"
+    remaining_bottleneck: "Terminal target met. Phase-4 L0 rank0 Free fell to 31.708 ms; any future work must start with a fresh L1 and reconsider rank image-load balance/layout fragmentation."
+    is_terminal: true
+  platform_findings:
+    - "On asynchronous NPU execution, replacing a queue-draining operation can merely move the wait to the next scalar readback; evaluate the complete chain."
+    - "A slower isolated dense image-token replacement can improve end to end by avoiding dynamic-index queue drainage; framework masked_scatter was still slower than a custom cumsum/index_select/where implementation."
+    - "Batching detached scalar loss readback to an epoch boundary removed about 7.45% relative to the immediately preceding short variant without changing optimizer inputs."
+    - "A 256-GiB host-memory request is insufficient for 16-rank initialization of this workload; use 512 GiB."
+  context:
+    hardware: "16x Ascend NPU (910B-class)"
+    cann_version: "runtime supplied by codeserver-mindspeed:v1.0.5; torch_npu 2.7.1.post2"
+    model_arch: "NanoVLM: ViT + modality projector + 32-block decoder LM"
+    input_spec: "batch 2/device, gradient accumulation 4, sequence length 4096, full 210 steps with 10 warmup steps"
+    profiling_level: "L0 + L1"
+    date: "2026-08-31"
+    notes: "Training dynamics, model parameters, optimizer, sample order, and full-training step schedule are unchanged."

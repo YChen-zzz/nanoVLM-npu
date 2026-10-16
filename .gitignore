@@ -30,3 +30,5 @@ eval_results*/
 /shards/*
 *.png
 plots*/
+# NPU reproduction: keep the run logs the README links to
+!nanoVLM_npu/**/logs/

@@ -1,3 +1,115 @@
+# nanoVLM · Ascend NPU Leaderboard
+
+> **This repository tracks NPU reproductions of the nanoVLM training benchmark on eight Ascend NPUs.**
+>
+> Based on [huggingface/nanoVLM](https://github.com/huggingface/nanoVLM) — the upstream project trains a ~222M-parameter vision-language model (SigLIP2 vision encoder + SmolLM2 language model) on FineVision. Upstream code, documentation and contributor credit are preserved in full below.
+>
+> In this fork the same training is ported and benchmarked on **eight Ascend NPUs (two dies per NPU; 16 dies total)**. Two implementations are recorded: an unchanged port and an NPU-optimized build produced with the [NPU_optimal_reference_skills](https://github.com/YChen-zzz/NPU_optimal_reference_skills) workflow.
+>
+> - The leaderboard table below is the main result of this repository.
+> - Sources and successful run logs live under `nanoVLM_npu/baseline/` and `nanoVLM_npu/optimized/`.
+> - The section of the upstream README that mentions CUDA / H100 / multi-GPU launch flags is kept for history and attribution only and does **not** describe the NPU runs.
+
+---
+
+## Runtime
+
+The NPU runs use a common reference runtime with eight Ascend NPUs:
+
+| Field | Value |
+|---|---|
+| Python | version `3.10.19` |
+| torch | `2.7.1+cpu` |
+| torch_npu | `2.7.1.post2` |
+| CANN | `8.5.0` |
+| Hardware | eight Ascend NPUs (two dies per NPU; 16 dies total) |
+| Process count | 16 ranks in one DDP job |
+| Training batch | 2 per rank, gradient accumulation 4, global batch 128 |
+| Data and weights | FineVision parquet, `SigLIP2-base-patch16-512`, `SmolLM2-360M-Instruct` |
+| Default image | `docker.cnb.cool/nilpotenter/docker/codeserver-mindspeed:v1.0.5` |
+
+`torchrun --nproc_per_node=16` launches 16 processes for a single distributed training job;
+it does not mean 16 independent trainings running at once. Both implementations take the
+devices exclusively and run sequentially — nothing here is timed by running several
+trainings in parallel.
+
+Run the optimized build:
+
+```bash
+bash nanoVLM_npu/optimized/run.sh
+```
+
+Run the baseline:
+
+```bash
+bash nanoVLM_npu/baseline/run.sh
+```
+
+`NANOVLM_ASSETS` defaults to `../../offline_assets` relative to each `source/` directory; set it
+to an absolute path to use assets stored elsewhere. The entry scripts do not install, download or probe the environment,
+and logs are redirected by the caller so existing result logs are never overwritten. The
+full reproduction recorded here ran in the `llm_test_migrated` environment; the default
+image entry point has been statically checked but not yet re-run end to end inside a clean
+default image.
+
+## NPU leaderboard
+
+Times are the timed training region of one complete run, `BENCH_MEASURE elapsed_s`: 210
+steps of which the first 10 are warmup, i.e. 200 timed steps / 800 microbatches. Model
+loading, warmup and the final validation sit outside the timed region, and the final
+validation runs 64 batches per rank. Rows are sorted from longest to shortest; each row is
+a single successful run, not an average over seeds.
+
+| # | Time | Final val loss | Implementation | Log |
+| - | - | - | - | - |
+| 1 | 929.909 s | 1.08315766 | baseline port, upstream algorithm unchanged | [log](nanoVLM_npu/baseline/logs/migrated_20261016.log) |
+| 2 | **500.434 s** | 1.08362198 | **\[optimized\]** NPU-targeted build on top of the port | [log](nanoVLM_npu/optimized/logs/migrated_20261016.log) |
+
+The optimized build removes **46.18%** of the training time, about **1.86x**. Both rows exit
+with code 0 and land inside the target band `1.08 ± 0.01`.
+
+What the optimized build changes, with no change to the model structure, optimizer, data
+order, seed, batch size, step count or learning-rate schedule:
+
+- native GQA and BF16 RoPE, cutting attention copies and dtype conversions;
+- fused residual RMSNorm, fused SwiGLU, and a fused loss over the valid tokens;
+- gradient checkpointing disabled, trading memory for less recomputation;
+- attention-mask reuse, cheaper image-token replacement and data synchronisation;
+- the loss read deferred, so each microbatch waits on fewer NPU synchronisations.
+
+The baseline additionally carries a process-exit compatibility fix that is outside the timed
+region. The operator-level and precision changes are visible in the diff between
+`nanoVLM_npu/baseline/source/` and `nanoVLM_npu/optimized/source/`.
+
+## Rules
+
+New records must:
+
+1. Attain a final validation loss inside `1.08 ± 0.01`, on the same evaluation the listed
+   rows use (64 batches per rank), on the hardware and runtime above.
+2. Keep the training task and dynamics unchanged: same model, same data order, same seed,
+   same batch size and gradient accumulation, same step count and learning-rate schedule.
+   Operator-level and precision changes are fair game.
+3. Report the timed training region of one complete run — the 210 `BENCH_MEASURE` steps of
+   which the first 10 are untimed. Model loading, warmup and the final validation stay
+   outside the timed region, exactly as for the listed rows.
+4. Include the full log (`BENCH_MEASURE`, `FINAL_VAL_LOSS`, exit code), the training source,
+   a short `run.sh`, and a note on what was optimized.
+5. Beat the prior record on the same hardware.
+
+Other than that, anything goes: NPU-specific optimisation is the point of this repository.
+
+## Submitting
+
+Open a pull request against this repository — not against the upstream GPU project. Each
+submission adds the training source, a short `run.sh`, the full log, the hardware and
+software versions, and its new leaderboard row. Do not include passwords, private keys,
+tokens, model weights or the full dataset.
+
+---
+
+## Below is the original upstream README (preserved for full attribution)
+
 # nanoVLM
 
 ![nanoVLM](assets/nanoVLM.png)

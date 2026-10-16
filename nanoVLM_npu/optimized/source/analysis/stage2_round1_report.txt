@@ -1,0 +1,930 @@
+======================================================================
+=== Phase 2 Profiling 分析报告 ===
+L1 目录: profiling/20260831_021404_l1
+L0 参考目录: profiling/20260831_021041_l0
+Rank: 0
+
+----------------------------------------------------------------------
+--- A. 全局视角 ---
+
+[L1] # Step Trace 耗时摘要
+数据来源: profiling/20260831_021404_l1/rank_0/training-job-1788113403-5fd75f-master-0_413_20260831021533728_ascend_pt/ASCEND_PROFILER_OUTPUT/step_trace_time.csv
+步数: 3
+
+## 总体
+  Device 利用率: 57.0%  (Computing / (Computing + Free))
+  Computing: 1629.5 ms (42.8%)
+  Free:      1229.3 ms (32.3%)
+  Comm:      951.4 ms (25.0%)
+
+  瓶颈在 device 侧（利用率 57%）
+  - 需 kernel 级分析区分 compute-bound 和 memory-bound
+
+  理论下限 (= Computing): 1629.5 ms
+  可优化空间: 32.3% ((Total - Computing) / Total)
+  - 可优化空间大。非 compute 的 overhead（dispatch/alloc/sync）显著；按此上限而非实现难度对候选排序
+
+## 优化上限（按这些对候选排序）
+  Compute 下限（不可低于）: 1629.5 ms (42.8%)
+  Host/dispatch 上限（可回收 Free）: 1229.3 ms (32.3%)
+  Communication 上限（可 overlap/消除）: 951.4 ms (25.0%)
+  - 最大上限 = host/dispatch (Free)。优先处理 host 侧问题。
+  子类别上限（更细拆分）:
+    sync vs alloc vs dispatch - operator_details 中 Host Time by Category 部分
+    fusible small-op 节省  - kernel_details 中 Fusible sequences 部分
+
+## 每 step 拆分
+ Step Computing(ms)   Free(ms)   Comm(ms)  Preparing(ms)   Util%
+----------------------------------------------------------------
+    0         469.8      357.1      116.6            1.4   56.8%
+    1         614.5      521.3      782.4            1.1   54.1%
+    2         545.1      350.8       52.4            0.6   60.8%
+
+## Preparing 分析
+  平均每 step Preparing: 1.0 ms
+  平均每 step Computing: 543.2 ms
+
+## 可疑信号
+  [DEFINITE]=可直接行动  [SIGNAL]=异常，根因未定 — 需结合其他 profiling 维度交叉验证
+  [SIGNAL] step duration spread: 943.6ms ~ 1918.2ms (2.0x)
+    波动较大 — 交叉验证: 检查 trace_view 中 compile 事件是否集中在异常 step
+
+[L0] # Step Trace 耗时摘要
+数据来源: profiling/20260831_021041_l0/rank_0/training-job-1788113385-840db4-master-0_413_20260831021211356_ascend_pt/ASCEND_PROFILER_OUTPUT/step_trace_time.csv
+步数: 1
+
+## 总体
+  Device 利用率: 97.4%  (Computing / (Computing + Free))
+  Computing: 1620.4 ms (66.4%)
+  Free:      42.9 ms (1.8%)
+  Comm:      776.4 ms (31.8%)
+
+  瓶颈在 device 侧（利用率 97%）
+  - 需 kernel 级分析区分 compute-bound 和 memory-bound
+
+  理论下限 (= Computing): 1620.4 ms
+  可优化空间: 1.8% ((Total - Computing) / Total)
+
+## 优化上限（按这些对候选排序）
+  Compute 下限（不可低于）: 1620.4 ms (66.4%)
+  Host/dispatch 上限（可回收 Free）: 42.9 ms (1.8%)
+  Communication 上限（可 overlap/消除）: 776.4 ms (31.8%)
+  - 最大上限 = communication。优先 comm-compute overlap / comm 减少。
+  子类别上限（更细拆分）:
+    sync vs alloc vs dispatch - operator_details 中 Host Time by Category 部分
+    fusible small-op 节省  - kernel_details 中 Fusible sequences 部分
+
+## 可疑信号
+  [DEFINITE]=可直接行动  [SIGNAL]=异常，根因未定 — 需结合其他 profiling 维度交叉验证
+  [INFO] 单步推理 profile（1 step）— step variance/spread 信号未启用
+    使用上方的总体利用率与可优化空间；通过 trace_view / operator_details 交叉验证 host-bound 成因
+
+⚠ L0/L1 交叉验证：对比上方 L0 和 L1 的 Computing%/Free%/Utilization。
+  若 L1 Utilization 显著低于 L0（差 >20pp），L1 的低利用率可能由
+  profiler barrier 注入导致。瓶颈类型判定以 L0 为准；L1 的算子级
+  数据（op_statistic、kernel_details 等）仍然有效。
+
+----------------------------------------------------------------------
+--- B. 设备侧：算子分布 ---
+
+# 算子统计摘要
+数据来源: profiling/20260831_021404_l1/rank_0/training-job-1788113403-5fd75f-master-0_413_20260831021533728_ascend_pt/ASCEND_PROFILER_OUTPUT/op_statistic.csv
+算子类型总数: 70
+Device 总耗时: 2050.8 ms
+Kernel 总数: 18846
+
+  # OP Type                            Count  Total(ms)   Avg(us)  Ratio%  Cumul%
+---------------------------------------------------------------------------------
+  1 allreduceAicpuKernel                  58      421.2    7261.8   20.5%   20.5%
+  2 FlashAttentionScoreGrad              132      307.1    2326.5   15.0%   35.5%
+  3 MatMulV2                            1721      278.7     161.9   13.6%   49.1%
+  4 MatMulV3                             344      171.2     497.6    8.3%   57.4%
+  5 FlashAttentionScore                  132      142.3    1078.2    6.9%   64.4%
+  6 Add                                 2195       81.1      36.9    4.0%   68.3%
+  7 Transpose                           2025       71.0      35.1    3.5%   71.8%
+  8 Cast                                3684       70.4      19.1    3.4%   75.2%
+  9 MatMulV3                             110       60.2     547.2    2.9%   78.2%
+ 10 Mul                                 2843       52.2      18.4    2.5%   80.7%
+ 11 LayerNormGradV3                       75       46.4     618.3    2.3%   83.0%
+ 12 Conv2DBackpropFilter                   3       39.4   13149.9    1.9%   84.9%
+ 13 ReduceSum                            351       35.6     101.3    1.7%   86.6%
+ 14 GeluGrad                              36       30.4     844.3    1.5%   88.1%
+ 15 AsStrided                            216       24.5     113.6    1.2%   89.3%
+ 16 LayerNormV3                           75       23.8     317.9    1.2%   90.5%
+ 17 ConcatD                              523       21.5      41.0    1.0%   91.5%
+ 18 SwiGluGrad                            96       19.8     206.5    1.0%   92.5%
+ 19 Gelu                                  36       16.7     462.9    0.8%   93.3%
+ 20 RmsNormGrad                           96       15.6     162.7    0.8%   94.1%
+ 21 Slice                                768       14.4      18.8    0.7%   94.8%
+ 22 BroadcastTo                          201       11.8      58.9    0.6%   95.3%
+ 23 Addcdiv                              440        9.4      21.5    0.5%   95.8%
+ 24 AddRmsNorm                            96        9.4      97.4    0.5%   96.3%
+ 25 SwiGlu                                96        7.5      78.1    0.4%   96.6%
+ 26 LogicalOr                             96        6.0      62.3    0.3%   96.9%
+ 27 ForeachMulScalar                      24        5.9     246.2    0.3%   97.2%
+ 28 ForeachAddcmulScalar                  30        5.1     170.9    0.2%   97.5%
+ 29 ForeachLerpScalar                     21        5.1     242.9    0.2%   97.7%
+ 30 TensorMove                           282        4.5      15.9    0.2%   97.9%
+
+## 可疑信号
+  [DEFINITE]=可直接行动  [SIGNAL]=异常，根因未定 — 需结合其他 profiling 维度交叉验证
+- [DEFINITE] Top-3 集中度: 占 device 总耗时 49.1%
+- [SIGNAL] Data movement overhead: 7.5% (153.8ms)
+  ops: Transpose, Cast, BroadcastTo, MemSet, broadcastAicpuKernel
+  - Layout/format 转换开销。交叉验证: 在 kernel_details 中确认 mte 占比，在 operator_details 中定位来源
+- [SIGNAL] 重型单次调用算子:
+  Conv2DBackpropFilter: count=3, avg=13150us — 大 shape 或高开销 kernel
+
+----------------------------------------------------------------------
+--- C. 设备侧：Kernel 级详情 ---
+
+# Kernel Details 分析
+数据来源: profiling/20260831_021404_l1/rank_0/training-job-1788113403-5fd75f-master-0_413_20260831021533728_ascend_pt/ASCEND_PROFILER_OUTPUT/kernel_details.csv
+Kernel 总数: 18,908  |  Compute: 3002.2ms  |  Wait: 1386.2ms
+
+## 1. Accelerator Core 分布
+  COMMUNICATION: 62 个 kernel, 951.4ms (31.7%)
+  MIX_AIC: 614 个 kernel, 623.4ms (20.8%)
+  AI_VECTOR_CORE: 15,250 个 kernel, 519.7ms (17.3%)
+  AI_CPU: 59 个 kernel, 421.4ms (14.0%)
+  AI_CORE: 1,837 个 kernel, 381.0ms (12.7%)
+  MIX_AIV: 1,086 个 kernel, 105.4ms (3.5%)
+  (59 个 communication 算子运行在 AI_CPU 上 — 预期行为，非问题)
+  [SIGNAL] AI_CORE (381.0ms) 与 AI_VECTOR_CORE (519.7ms) 均显著 (ratio=0.73)
+
+## 2. 硬件单元利用率（平均 ratio）
+  AI_CORE (1837 个 kernel):
+    mac (compute):  0.610
+    mte1 (load):    0.478
+    mte2 (store):   0.896
+    scalar:         0.341
+    fixpipe:        0.347
+    icache miss:    avg=0.002  max=0.008
+    [duration-weighted] mac=0.641  mte=1.438  （重型 kernel 占主导；与上方算术平均对比以观察双峰分布）
+    - Memory 主导: mte (1.438) >> mac (0.641)
+  AI_VECTOR_CORE (15250 个 kernel):
+    vec (compute):  0.122
+    mte2 (load):    0.522
+    mte3 (store):   0.275
+    scalar:         0.144
+    icache miss:    avg=0.085  max=0.454
+    [duration-weighted] vec=0.229  mte=0.965
+  Input Formats: {'ND': 28444, 'NCHW': 8306, 'NCL': 6290, 'N/A': 142, 'NC1HWC0:1': 12, 'NULL': 9, 'FRACTAL_Z_C04': 3, 'FRACTAL_Z:1': 3}
+  - 14623/43209 (34%) 非 ND input format — layout 转换开销；交叉验证 op_statistic 的 Transpose/Cast。
+  Cube 利用率: avg=91.0%, min=57.5%, low(<50%)=0/1837
+
+## 3. Kernel Duration 分布
+      <5us:   2493 ( 13.2%) ████
+    5-20us:   6750 ( 35.7%) ███████████
+   20-50us:   4923 ( 26.0%) ████████
+  50-200us:   2895 ( 15.3%) █████
+    >200us:   1847 (  9.8%) ███
+  短 kernel 占比 (<20us): 48.9%
+
+## 4. 小 kernel（duration < 5.0us）
+  数量: 2,493 (13.2% 占所有 kernel)  |  累计: 5.94ms
+  Top 类型:
+    Cast: 688
+    Mul: 688
+    Add: 431
+    Addcdiv: 164
+    LpNormV2: 157
+    ZerosLike: 150
+    Rsqrt: 99
+    Sub: 96
+    RealDiv: 7
+    Greater: 3
+
+## 5. Block Dim 分布（并行度）
+  Dim     1:   1280 (  6.8%) ██
+  Dim   2-8:    998 (  5.3%) █
+  Dim  9-28:   2851 ( 15.1%) █████
+  Dim   29+:  13779 ( 72.9%) ████████████████████████
+
+## 6. Wait Time 分布
+      <100us:   15048 (79.6%)
+   100-500us:    3538 (18.7%)
+  500-2000us:     295 (1.6%)
+     >2000us:      27 (0.1%)
+
+## 7. 可疑信号
+  [DEFINITE]=可直接行动  [SIGNAL]=异常，需结合其他维度交叉验证
+
+  [SIGNAL] 高 duration、低 compute ratio — 交叉验证: 用 --filter <op> 查看 shape 分布
+  Name                                       Core   Dur(us)  Compute     Move  BDim Shapes
+  ----------------------------------------------------------------------------------------
+  aclnnConvolutionBackward_Conv2DBackpropFilterWithFlag_Conv2DBackpropFilter AIC    14952.6   0.067   1.029    24 44,1,512,512,16|4|44,48,32,32,
+  aclnnConvolutionBackward_Conv2DBackpropFilterWithFlag_Conv2DBackpropFilter AIC    14499.8   0.068   1.030    24 43,1,512,512,16|4|43,48,32,32,
+  aclnnConvolutionBackward_Conv2DBackpropFilterWithFlag_Conv2DBackpropFilter AIC     9997.3   0.069   1.030    24 30,1,512,512,16|4|30,48,32,32,
+  aclnnConvolution_Conv2dWithFlag_Conv2D     AIC     1369.7   0.189   1.242    24 43,1,512,512,16|64,48,16,16|76
+  aclnnForeachAddScalarV2_ForeachAddScalarV2_ForeachAddScalar AIV      666.6   0.030   1.387    48 49218,960|2560,960|2560,960|96
+  aclnnForeachMulScalarV2_ForeachMulScalarV2_ForeachMulScalar AIV      593.0   0.034   1.384    48 49218,960|2560,960|2560,960|96
+  aclnnForeachMulScalarV2_ForeachMulScalarV2_ForeachMulScalar AIV      566.9   0.036   1.324    48 49218,960|2560,960|2560,960|96
+  aclnnAdd_AddAiCore_Add                     AIV      541.2   0.028   1.183    48 49218,960|49218,960
+  aclnnAdd_AddAiCore_Add                     AIV      538.5   0.028   1.187    48 49218,960|49218,960
+  aclnnAdd_AddAiCore_Add                     AIV      534.8   0.028   1.180    48 49218,960|49218,960
+  aclnnAdd_AddAiCore_Add                     AIV      491.7   0.030   1.183    48 49218,960|49218,960
+  aclnnAdd_AddAiCore_Add                     AIV      489.8   0.031   1.179    48 49218,960|49218,960
+  aclnnCat_ConcatD_ConcatD                   AIV      417.9   0.026   1.422    48 44,1024,768|44,1024,768|44,102
+  aclnnAdd_AddAiCore_Add                     AIV      403.4   0.027   1.254    48 44,1024,768|44,1024,768
+  aclnnAdd_AddAiCore_Add                     AIV      397.9   0.028   1.267    48 44,1024,768|44,1024,768
+
+  [SIGNAL] 真正的 compute-bound（高 duration + 高 compute ratio）— replace/quantize/split 目标
+  Name                                        Dur(us)    mac  BDim Shapes
+  -----------------------------------------------------------------------
+  aclnnMm_MatMulCommon_MatMulV2                 835.8  0.75    24 45056,3072|3072,768
+  aclnnAddmm_MatMulCommon_MatMulV2              799.5  0.77    24 45056,3072|768,3072|768
+  aclnnAddmm_MatMulCommon_MatMulV2              799.2  0.76    24 45056,3072|768,3072|768
+  aclnnAddmm_MatMulCommon_MatMulV2              799.1  0.77    24 45056,3072|768,3072|768
+  aclnnAddmm_MatMulCommon_MatMulV2              798.7  0.76    24 45056,3072|768,3072|768
+  aclnnMm_MatMulCommon_MatMulV2                 798.2  0.78    24 45056,3072|3072,768
+  aclnnAddmm_MatMulCommon_MatMulV2              794.7  0.76    24 45056,3072|768,3072|768
+  aclnnAddmm_MatMulCommon_MatMulV2              793.7  0.77    24 45056,3072|768,3072|768
+  aclnnAddmm_MatMulCommon_MatMulV2              790.9  0.78    24 45056,3072|768,3072|768
+  aclnnAddmm_MatMulCommon_MatMulV2              790.1  0.77    24 45056,3072|768,3072|768
+  aclnnAddmm_MatMulCommon_MatMulV2              785.7  0.77    24 45056,3072|768,3072|768
+  aclnnAddmm_MatMulCommon_MatMulV2              783.6  0.76    24 44032,3072|768,3072|768
+  aclnnAddmm_MatMulCommon_MatMulV2              782.1  0.78    24 45056,3072|768,3072|768
+  aclnnAddmm_MatMulCommon_MatMulV2              781.7  0.76    24 44032,3072|768,3072|768
+  aclnnAddmm_MatMulCommon_MatMulV2              777.0  0.78    24 45056,3072|768,3072|768
+
+  [SIGNAL] 高 wait kernel (wait > 500us) — 交叉验证: 在 trace_view 中查找原因
+
+  [1] #13660 aclnnDivs_RealDivAiCore_RealDiv  wait=35.6ms  stream=47
+      [13656] Addcdiv              dur=    2.5us  wait=     79us
+      [13657] ReduceSum            dur=   77.8us  wait=   7135us
+      [13660] RealDiv              dur=    1.6us  wait=  35611us <<<
+      [13664] ConcatD              dur=  196.4us  wait=   7498us
+      [13665] GatherV2             dur=  173.7us  wait=     92us
+
+  [2] #13341 ForeachSqrt  wait=31.1ms  stream=47
+      [13339] ForeachAddcmulScalar dur=  187.2us  wait=      0us
+      [13340] ForeachAddcmulScalar dur=   18.3us  wait=      0us
+      [13341] ForeachSqrt          dur=  489.0us  wait=  31139us <<<
+      [13342] ForeachSqrt          dur=  170.9us  wait=      0us
+      [13343] ForeachSqrt          dur=  164.0us  wait=      0us
+
+  [3] #12196 aclnnInplaceCopy_TensorMoveAiCore_TensorMove  wait=24.6ms  stream=47
+      [12194] TensorMove           dur=   12.4us  wait=      7us
+      [12195] TensorMove           dur=   27.1us  wait=      3us
+      [12196] TensorMove           dur=   10.0us  wait=  24556us <<<
+      [12197] TensorMove           dur=    8.6us  wait=      1us
+      [12198] TensorMove           dur=  252.6us  wait=      0us
+
+  [4] #12181 hcom_allReduce__612_57_1  wait=18.1ms  stream=N/A
+      [12171] hcom_allReduce_      dur=18117.3us  wait=  17814us
+      [12176] hcom_allReduce_      dur=18167.4us  wait=  18035us
+      [12181] hcom_allReduce_      dur=18163.3us  wait=  18086us <<<
+      [12186] hcom_allReduce_      dur=18139.0us  wait=  18079us
+      [12191] hcom_allReduce_      dur=24681.6us  wait=  18058us
+
+  [5] #12186 hcom_allReduce__612_58_1  wait=18.1ms  stream=N/A
+      [12176] hcom_allReduce_      dur=18167.4us  wait=  18035us
+      [12181] hcom_allReduce_      dur=18163.3us  wait=  18086us
+      [12186] hcom_allReduce_      dur=18139.0us  wait=  18079us <<<
+      [12191] hcom_allReduce_      dur=24681.6us  wait=  18058us
+      [13658] hcom_allReduce_      dur=35968.0us  wait=   1100us
+
+  [6] #12191 hcom_allReduce__612_59_1  wait=18.1ms  stream=N/A
+      [12181] hcom_allReduce_      dur=18163.3us  wait=  18086us
+      [12186] hcom_allReduce_      dur=18139.0us  wait=  18079us
+      [12191] hcom_allReduce_      dur=24681.6us  wait=  18058us <<<
+      [13658] hcom_allReduce_      dur=35968.0us  wait=   1100us
+      [13661] hcom_allReduce_      dur=13389.5us  wait=   1170us
+
+  [7] #12176 hcom_allReduce__612_56_1  wait=18.0ms  stream=N/A
+      [12166] hcom_allReduce_      dur=17896.7us  wait=      0us
+      [12171] hcom_allReduce_      dur=18117.3us  wait=  17814us
+      [12176] hcom_allReduce_      dur=18167.4us  wait=  18035us <<<
+      [12181] hcom_allReduce_      dur=18163.3us  wait=  18086us
+      [12186] hcom_allReduce_      dur=18139.0us  wait=  18079us
+
+  [8] #12171 hcom_allReduce__612_55_1  wait=17.8ms  stream=N/A
+      [12160] hcom_allReduce_      dur=18384.6us  wait=      0us
+      [12166] hcom_allReduce_      dur=17896.7us  wait=      0us
+      [12171] hcom_allReduce_      dur=18117.3us  wait=  17814us <<<
+      [12176] hcom_allReduce_      dur=18167.4us  wait=  18035us
+      [12181] hcom_allReduce_      dur=18163.3us  wait=  18086us
+
+  [SIGNAL] Fusible 序列: 1 个序列，每个含 ≥5 个连续小 kernel (<10.0us)
+    Fusible 序列总耗时: 0.12ms (0.0% 占 compute)
+    按累计耗时排序的 Top 5:
+      0.12ms  35 个 kernel  at #12660  stream=47  类型: Mul:35
+    - 交叉验证: 检查这些是否能 fuse (equivalent_substitution layer 1) 或 batch。
+
+----------------------------------------------------------------------
+--- D. Host-Device 交互 ---
+
+# Trace View 时间线分析
+数据来源: profiling/20260831_021404_l1/rank_0/training-job-1788113403-5fd75f-master-0_413_20260831021533728_ascend_pt/ASCEND_PROFILER_OUTPUT/trace_view.json
+
+## 0. 检测到的 Layer (由采集开关决定)
+  device kernels (Task Type):   62,479
+  HostToDevice dispatch flow:   15,925
+  CANN AscendCL@ host events:   135,242
+  torch cpu_op events:          104,706
+  python_function frames:       45,442
+  fwdbwd links:                 13,800
+
+## 1. Device 时间线 (compute streams)
+  Stream (pid,tid)             Span     Active   Busy%  Kernels
+  (423328, 47)                3.42s      2.16s   63.1%   18,787
+  + 折叠了 13 个非 compute stream （43,164 个 task: comm/sync/DMA — NOTIFY/SDMA/EVENT/AI_CPU）
+  Gap 分布 (每 stream 内连续 COMPUTE task 之间):
+        <10us: 13,265
+      10-50us: 839
+     50-200us: 2,598
+       >200us: 2,084
+
+## 2. Device Stall (gap >= 50us, 按 kernel pair 聚合)
+  相同 kernel pair 的 stall 已聚合；按累计 gap 排序 — 重复且大的 stall 值得优化。
+   Count     SumGap    AvgGap    MaxGap  After -> Before kernel
+       1    249.1ms   249.1ms   249.1ms  aclnnReduceSum_ReduceSumOp -> aclnnCat_ConcatD_ConcatD
+       9    152.1ms    16.9ms    24.6ms  aclnnInplaceCopy_TensorMov -> aclnnInplaceCopy_TensorMov
+     426    126.8ms   297.7us     1.3ms  aclnnCast_CastAiCore_Cast -> aclnnMatmul_MatMulCommon_M
+     351    126.0ms   359.1us     1.1ms  aclnnMatmul_MatMulCommon_M -> aclnnCast_CastAiCore_Cast
+     192     87.0ms   453.1us   838.3us  aclnnMul_MulAiCore_Mul -> aclnnNeg_SliceAiCore_Slice
+     545     86.4ms   158.6us   349.4us  aclnnCast_CastAiCore_Cast -> aclnnCast_CastAiCore_Cast
+       2     47.6ms    23.8ms    31.1ms  aclnnForeachAddcmulScalarV -> ForeachSqrt
+      96     43.6ms   453.9us   698.9us  aclnnBitwiseNot_LogicalNot -> aclnnEqScalar_EqualAiCore_
+      96     42.1ms   438.1us   612.8us  aclnnAdd_AddAiCore_Add -> aclnnCast_CastAiCore_Cast
+      96     37.1ms   386.8us   743.1us  aclnnBitwiseOrTensor_Logic -> aclnnFlashAttentionScore_T
+       1     37.1ms    37.1ms    37.1ms  aclnnReduceSum_ReduceSumOp -> aclnnDivs_RealDivAiCore_Re
+      96     33.5ms   348.5us   518.1us  aclnnCast_CastAiCore_Cast -> AddRmsNorm
+      96     31.8ms   331.0us   678.2us  aclnnEqScalar_EqualAiCore_ -> aclnnBitwiseOrTensor_CastA
+      33     29.0ms   879.9us     1.4ms  aclnnAddmm_MatMulV3Common_ -> aclnnFlashAttentionScore_A
+       1     28.8ms    28.8ms    28.8ms  aclnnDivs_RealDivAiCore_Re -> aclnnCat_ConcatD_ConcatD
+  不同 stall pair 数: 93
+
+## 3. Host-Device Dispatch Latency (HostToDevice flow)
+  count=15,925  avg=36031.0us  max=326472.5us
+  p50=23823.6us  p90=75989.1us  （p90>>p50 表明 dispatch backlog 不均匀）
+  Top dispatch latency (最近的 device kernel 名, 用于定位 dispatch 点):
+    326472.5us  ≈ aclnnInplaceCopy_TensorMoveAiCore_Tensor
+    326463.8us  ≈ aclnnInplaceCopy_TensorMoveAiCore_Tensor
+    317082.7us  ≈ aclnnReduceSum_ReduceSumOpAiCore_ReduceS
+    317062.2us  ≈ aclnnReduceSum_ReduceSumOpAiCore_ReduceS
+    317048.6us  ≈ aclnnInplaceCopy_TensorMoveAiCore_Tensor
+    317039.2us  ≈ aclnnReduceSum_ReduceSumOpAiCore_ReduceS
+    317025.0us  ≈ aclnnInplaceCopy_TensorMoveAiCore_Tensor
+    317019.9us  ≈ aclnnInplaceCopy_TensorMoveAiCore_Tensor
+    302694.9us  ≈ aclnnInplaceCopy_TensorMoveAiCore_Tensor
+    302685.6us  ≈ aclnnInplaceCopy_TensorMoveAiCore_Tensor
+    301930.3us  ≈ None
+    292620.0us  ≈ aclnnReduceSum_ReduceSumOpAiCore_ReduceS
+    292601.8us  ≈ aclnnReduceSum_ReduceSumOpAiCore_ReduceS
+    292595.0us  ≈ aclnnReduceSum_ReduceSumOpAiCore_ReduceS
+    292590.5us  ≈ aclnnReduceSum_ReduceSumOpAiCore_ReduceS
+  预估 dispatch 总量: 1488472.2 ms (dev_count x p50_latency)
+  Dispatch / kernel-active ratio: 68986.8%
+  - Dispatch overhead 预估 > 50% 的 kernel-active 时间
+    在 async queue 下二者 overlap；实际影响取决于 gap 分布:
+    gap > 50us 占比高: dispatch 未完全 overlap — 减少 op 数量有帮助
+    gap < 10us 占比高: dispatch 已完全 overlap — Free 源自串行依赖
+
+## 4. Host2Device Bound 区域
+  未发现 Node@launch↔device pairs (connection_id) — 无法评估 host2device bound。
+
+
+## 5. Resource 利用率时间线 (counters)
+  HBM Read BW                samples=  1,420  avg=   18505.5  min=       0.0  max=  169164.0
+  HBM Write BW               samples=  1,420  avg=   13688.7  min=       0.0  max=   73912.2
+  LLC Hit Rate(%)            samples=    350  avg=       0.4  min=       0.0  max=       0.9
+  LLC Throughput(MB/s)       samples=    350  avg=    9992.2  min=       0.0  max=   85427.4
+  L2 Buffer Bw Level         samples=    179  avg=       1.1  min=       0.0  max=       7.0
+  MAC Bw Level               samples=    179  avg=       3.1  min=       0.0  max=      31.0
+  Memory Occupancy(KB)       samples=    708  avg=22917355.4  min=       0.0  max=45999508.0
+  utilization                samples= 37,652  avg=  558487.9  min=       0.0  max=45999508.0
+  - HBM Read BW peak=169164 MB/s — 交叉验证 HBM peak BW 以判断内存饱和。
+  - LLC Hit Rate 均值偏低 (43%) — cache-unfriendly 的访问模式；交叉验证 kernel_details 的 mte 占比。
+
+## 5b. Stream Concurrency (overlap 维度)
+  单个 compute stream 或无区间 — 无 multi-stream overlap 可利用 (stream 级 latency-hiding N/A).
+
+## 5c. Idle 时间原因拆解 (time-aligned: device idle 时 host 在做什么)
+  Device idle (所有 stream idle): 1.80s / wall-clock span 3.43s (52%)
+  Idle 归因到该时刻 host 正在做的事:
+    sync         530.4ms ( 29.5%)
+    launch       56.8ms (  3.2%)
+    other-aclrt  32.9ms (  1.8%)
+    residual     1.18s ( 65.5%)  (Python framework / 无工作；交叉验证 operator_details host category)
+  - 主导 idle 原因: residual (65% 占 idle)
+
+## 6. 可疑信号
+  [DEFINITE]=可直接行动  [SIGNAL]=异常，需结合其他维度交叉验证
+
+  [SIGNAL] Prefetch / Prealloc 候选 (H2D copy & alloc ops)
+    这些 op 无需替换算子即可优化 (prefetch / pre-allocate / buffer 复用); Call stack 指向代码位置。
+    - aten::to  host=4468.3us
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+    - aten::_to_copy  host=4437.9us
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+    - aten::copy_  host=4335.6us
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+    - aten::to  host=1756.3us
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+    - aten::_to_copy  host=1719.3us
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+    - aten::to  host=1653.1us
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+    - aten::_to_copy  host=1617.3us
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+    - aten::copy_  host=1568.9us
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+    - aten::copy_  host=1502.5us
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+    - aten::to  host=1317.3us
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+    - aten::to  host=1295.4us
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+    - aten::_to_copy  host=1285.3us
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+    - aten::_to_copy  host=1260.2us
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+    - aten::copy_  host=1189.4us
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+    - aten::copy_  host=1152.8us
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+        /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_skill-tuning/ablations
+
+----------------------------------------------------------------------
+--- E. 源码定位 ---
+
+# Operator Details — Host Overhead 概览
+数据来源: profiling/20260831_021404_l1/rank_0/training-job-1788113403-5fd75f-master-0_413_20260831021533728_ascend_pt/ASCEND_PROFILER_OUTPUT/operator_details.csv
+总行数: 104,703
+总 host 时间: 2759.8 ms
+Device 总耗时: 3002.3 ms
+Host/Device 比例: 0.9x
+
+## Top 15 个 op (按 Host Self Duration)
+  (聚焦 host 侧 overhead — device 时间分析请用 kernel_details)
+
+  Op Name                                Count   Host(ms) Device(ms)  H/D Ratio
+  -----------------------------------------------------------------------------
+  aten::_local_scalar_dense               1546      432.5        0.0        inf
+  empty_tensor                           14195      337.5        0.0        inf
+  aten::_index_put_impl_                     6      228.1        0.0        inf
+  aten::as_strided                        6819      126.7        0.0        inf
+  DistributedDataParallel.forward            3      124.7        0.0        inf
+  aten::to                                2659       95.0        0.0        inf
+  npu::_npu_dtype_cast                    1902       78.3        0.0        inf
+  aclnnCast                               3339       78.1       76.2       1.0x
+  aten::linear                            1452       70.4        0.0        inf
+  aten::transpose                         4110       65.7        0.0        inf
+  aten::mul                               2403       54.4        0.0        inf
+  aten::view                              3425       49.0        0.0        inf
+  aten::result_type                       2739       48.8        0.0        inf
+  aten::t                                 1884       36.7        0.0        inf
+  aten::slice                             1261       32.1        0.0        inf
+
+## 纯 Host Op (未触发 device kernel)
+  纯 host 总耗时: 2470.8 ms (89.5% 占全部 host 时间)
+  这些是 metadata/framework 操作，不产生任何 device 工作。
+
+  Op Name                                Count   Host(ms)
+  -------------------------------------------------------
+  aten::_local_scalar_dense               1546      432.5
+  empty_tensor                           14195      337.5
+  aten::_index_put_impl_                     6      228.1
+  aten::as_strided                        6819      126.7
+  DistributedDataParallel.forward            3      124.7
+  aten::to                                2659       95.0
+  npu::_npu_dtype_cast                    1902       78.3
+  aten::linear                            1452       70.4
+  aten::transpose                         4110       65.7
+  aten::mul                               2403       54.4
+  aten::view                              3425       49.0
+  aten::result_type                       2739       48.8
+  aten::t                                 1884       36.7
+  aten::slice                             1261       32.1
+  aten::unsqueeze                          777       31.8
+
+## 按 Category 拆解 Host 时间
+  按算子 category 拆解总 host Self 时间 - 决定优化方向。
+  (total host self = 2759.8 ms)
+  other                       1291.2 ms  ( 46.8%)
+  alloc/metadata               599.6 ms  ( 21.7%)
+  sync (D-to-H)                460.2 ms  ( 16.7%)
+  dispatch (aclnn launch)      281.9 ms  ( 10.2%)
+  H2D/D2H copy                 123.5 ms  (  4.5%)
+  framework/comm                 3.3 ms  (  0.1%)
+
+## 按 Call-Chain Layer 拆解 Host 时间 (inclusive Host Total)
+  每个 layer 的 inclusive host 开销 (Host Total, self+children)。Line A 门槛: layer 占 total >10% - 必须有候选。
+   75.0%     6413.4 ms  (42072 个 op)  /models/share/chenyupeng/chenyupeng/Agent_training_optimization/diff_models/VLM/nanoVLM_sk
+
+## 可疑信号
+  [DEFINITE]=可直接行动  [SIGNAL]=异常，根因未定 — 需结合其他 profiling 维度交叉验证
+  - [DEFINITE] 纯 host op 占主导: 90% 的 host 时间无 device 工作
+    - Framework/dispatch overhead 是主要 host 瓶颈
+  - [SIGNAL] host/device 比例极端的 op (host > 10x device, host > 5ms):
+    record_event: host=6.6ms vs device=0.0ms
+    交叉验证: 用 --filter <op> 查看 Call Stack 源码位置，用 trace_view 查看 host dispatch 积压
+  - [DEFINITE] device 时间在 AI_CPU 上的 op (>50% 归因 AICore, fallback):
+    aclnnMatmul: device=265.5ms  aicpu=200.4ms (75%)
+    aclnnAddmm: device=70.9ms  aicpu=70.6ms (100%)
+    aclnnConvolution: device=3.5ms  aicpu=2.6ms (74%)
+    aclnnConvolutionBackward: device=41.4ms  aicpu=39.4ms (95%)
+    - 用 AI Core impl 替换 / 更改 dtype。交叉验证 kernel_details 第 3 节 AI CPU Fallback。
+
+## 下一步
+  使用 --filter <op_name> 深入特定算子并查看其 Call Stack。
+
+----------------------------------------------------------------------
+--- F. 内存 ---
+
+# Memory Record 摘要
+数据来源: profiling/20260831_021404_l1/rank_0/training-job-1788113403-5fd75f-master-0_413_20260831021533728_ascend_pt/ASCEND_PROFILER_OUTPUT/memory_record.csv
+总记录数: 92,420
+时长: 3.52s
+Components: {'APP': 176, 'PTA': 41388, 'PTA+GE': 41388, 'WORKSPACE': 9468}
+
+## 0. 各 Component 的 Peak Reserved
+  WORKSPACE = operator workspace（可通过 tiling/env 控制）；APP/PTA(+GE) = tensor 内存。
+  APP          peak=    44,600 MB  (176 records)
+  PTA          peak=    42,716 MB  (41,388 records)
+  PTA+GE       peak=    42,716 MB  (41,388 records)
+  WORKSPACE    peak=     1,070 MB  (9,468 records)
+  - WORKSPACE peak 1,070 MB 可独立控制（非 tensor 分配）。
+
+## 0a. Active 内存（真实活跃集）
+  记录数: 87,510  |  Min: 1,070 MB  |  Max: 37,711 MB
+  Active < Allocated = 已缓存但可复用的 headroom。应使用 Active (而非 Allocated) 确定 batch-size 上限。
+
+## 1. Reserved 内存 (allocator pool)
+  Min: 1,070 MB
+  Max: 44,600 MB  (at 1.697s)
+  Range: 43,530 MB
+
+  时间线（每桶最大 Reserved）:
+      0.000s █████████████████████████████    44,599 MB
+      0.176s █████████████████████████████    44,599 MB
+      0.352s █████████████████████████████    44,599 MB
+      0.528s █████████████████████████████    44,599 MB
+      0.703s █████████████████████████████    44,599 MB
+      0.879s █████████████████████████████    44,599 MB
+      1.055s █████████████████████████████    44,599 MB
+      1.231s █████████████████████████████    44,599 MB
+      1.407s █████████████████████████████    44,599 MB
+      1.583s ██████████████████████████████   44,600 MB
+      1.759s ██████████████████████████████   44,600 MB
+      1.934s ██████████████████████████████   44,600 MB
+      2.110s ██████████████████████████████   44,600 MB
+      2.286s ██████████████████████████████   44,600 MB
+      2.462s ██████████████████████████████   44,600 MB
+      2.638s ██████████████████████████████   44,600 MB
+      2.814s ██████████████████████████████   44,600 MB
+      2.989s ██████████████████████████████   44,600 MB
+      3.165s ██████████████████████████████   44,600 MB
+      3.341s ██████████████████████████████   44,600 MB
+
+## 2. Allocated 内存（实际 tensor 使用）
+  含 Allocated 数据的记录数: 87,510
+  Min: 1,070 MB
+  Max: 37,711 MB  (at 1.712s)
+  Range: 36,641 MB
+
+## 3. 池 Fragmentation (Reserved - Allocated)
+  Min gap: 0 MB
+  Max gap: 35,635 MB
+  Avg gap: 16,594 MB
+  - 大 gap (35,635MB) 表明存在显著的池 fragmentation 或过度预留
+
+  Fragmentation 时间线（每桶最大 gap）:
+      0.000s ████████████████████████████     33,830 MB
+      0.171s ███████████████████████          28,180 MB
+      0.342s ████████████████                 19,072 MB
+      0.513s ███████████████                  17,871 MB
+      0.684s ████████████████████████████     33,811 MB
+      0.856s ████████████████████████████     33,811 MB
+      1.027s ████████████████████████████     33,811 MB
+      1.198s ███████████████████████████      32,549 MB
+      1.369s ████████████                     15,143 MB
+      1.540s ████████                         10,482 MB
+      1.711s ██████████████                   17,767 MB
+      1.882s ████████████████████████████     33,879 MB
+      2.053s                                       0 MB
+      2.224s ████████████████████████████     33,879 MB
+      2.395s ██████████████████████████████   35,635 MB
+      2.567s █████████████████████████        30,881 MB
+      2.738s ██████████████                   16,945 MB
+      2.909s █████████                        11,864 MB
+      3.080s █████████████████████████        30,624 MB
+      3.251s ████████████████████████████     33,877 MB
+
+## 4. Top 10 Reserved 跳变
+  最大增长（池扩张）:
+      Time(s)    Delta(MB)    After(MB)
+        1.797      +43,530       44,600
+        2.337      +43,530       44,600
+        2.357      +43,530       44,600
+        2.397      +43,530       44,600
+        2.417      +43,530       44,600
+        2.437      +43,530       44,600
+        2.457      +43,530       44,600
+        2.557      +43,530       44,600
+        2.577      +43,530       44,600
+        2.737      +43,530       44,600
+  最大减少（池收缩）:
+        1.758      -43,530        1,070
+        1.917      -43,530        1,070
+        2.278      -43,530        1,070
+        2.324      -43,530        1,070
+        2.358      -43,530        1,070
+        2.382      -43,530        1,070
+        2.402      -43,530        1,070
+        2.437      -43,530        1,070
+        2.577      -43,530        1,070
+        2.917      -43,530        1,070
+
+## 可疑信号
+  [DEFINITE]=可直接行动  [SIGNAL]=异常，根因未定 — 需结合其他 profiling 维度交叉验证
+  - [SIGNAL] Reserved 增长趋势：早期均值 37,982MB - 末期均值 38,615MB (+633MB)
+    交叉验证: 检查 operator_memory 是否有未释放的 tensor 累积
+  - [SIGNAL] 高内存 churn: 14493 次跳变 > 50MB
+    交叉验证: 在 operator_memory 中查找重复的等大小 alloc - buffer 复用机会
+  - [SIGNAL] Fragmentation 增长：早期 gap 均值 16,454MB - 末期 19,165MB (+2,711MB)
+
+# Operator Memory 分析
+数据来源: profiling/20260831_021404_l1/rank_0/training-job-1788113403-5fd75f-master-0_413_20260831021533728_ascend_pt/ASCEND_PROFILER_OUTPUT/operator_memory.csv
+总分配记录数: 18,530
+Peak Allocated (任意分配点): 37,711 MB
+
+## 1. 按大小排序的 Top 20 分配
+    # Op Name                              Size     Lifetime  Alloc@(MB)
+  ----------------------------------------------------------------------
+    1 aten::_convolution                1.04 GB       57.8us      1,070
+    2 aten::native_layer_norm           1.04 GB       22.9us      1,070
+    3 aten::add                         1.04 GB       33.9us      1,070
+    4 aten::addmm                       1.04 GB       20.6us      1,070
+    5 npu::npu_fusion_attention         1.04 GB       53.2us      1,070
+    6 aten::addmm                       1.04 GB       27.8us      1,070
+    7 aten::native_layer_norm           1.04 GB       12.8us      1,070
+    8 npu::npu_fusion_attention         1.04 GB       47.3us      1,070
+    9 aten::addmm                       1.04 GB       20.0us      1,070
+   10 aten::copy_                       1.04 GB       20.1us      1,070
+   11 aten::addmm                       1.04 GB       18.5us      1,070
+   12 aten::addmm                       1.04 GB       23.8us      1,070
+   13 aten::native_layer_norm           1.04 GB       13.1us      1,070
+   14 aten::addmm                       1.04 GB       22.2us      1,070
+   15 aten::copy_                       1.04 GB       18.6us      1,070
+   16 aten::addmm                       1.04 GB       21.4us      1,070
+   17 aten::native_layer_norm           1.04 GB       15.1us      1,070
+   18 aten::addmm                       1.04 GB       21.1us      1,070
+   19 aten::native_layer_norm           1.04 GB       20.7us      1,070
+   20 aten::addmm                       1.04 GB       18.9us      1,070
+
+## 2. 按算子聚合 (按总大小排序的 Top 20)
+  Op Name                          Count      Total   Avg Size   Avg Life
+  -----------------------------------------------------------------------
+  npu::npu_dtype_cast               2019  634.53 GB   321.8 MB    528.1us
+  aten::copy_                        534  557.99 GB    1.04 GB     16.2us
+  aten::linalg_vector_norm           882  460.81 GB   535.0 MB     11.4ms
+  aten::cat                          906  413.28 GB   467.1 MB      2.1ms
+  aten::neg                          768  403.13 GB   537.5 MB     79.2us
+  aten::sum                          696  363.65 GB   535.0 MB     57.5us
+  aten::mul                         2155  234.25 GB   111.3 MB     19.6ms
+  aten::mm                           468  202.96 GB   444.1 MB    192.3us
+  aten::addmm                        288  168.98 GB   600.8 MB    164.8ms
+  npu::npu_fusion_attention_grad     528  146.44 GB   284.0 MB    319.2us
+  npu::npu_fusion_attention          528  143.12 GB   277.6 MB    274.9ms
+  aten::matmul_backward             1270  123.81 GB    99.8 MB    151.9us
+  aten::matmul                       681  116.36 GB   175.0 MB     80.6ms
+  npu::npu_swiglu_backward           192  107.81 GB   575.0 MB     63.7us
+  aten::div                          204  106.35 GB   533.8 MB     12.0ms
+  npu::npu_add_rms_norm              384  105.94 GB   282.5 MB    127.4ms
+  npu::npu_swiglu                    192  104.06 GB   555.0 MB    126.1ms
+  aten::mean                         198  103.45 GB   535.0 MB    144.4us
+  aten::pow                          198  103.45 GB   535.0 MB     20.4us
+  aten::bitwise_or                   192  103.31 GB   551.0 MB    128.4ms
+
+## 3. 短生命周期大 Tensor (size>100KB, lifetime<1ms)
+  发现: 11344 个 tensor
+  这些 tensor 快速分配并释放 — 适合 buffer 复用。
+
+  Op Name                          Count Typical Sizes
+  ----------------------------------------------------
+  npu::npu_dtype_cast               1627 1095680KB, 15360KB, 19200KB, 30720KB, 3600KB
+  aten::mul                         1570 1024KB, 1095680KB, 15360KB, 30720KB, 5120KB
+  aten::matmul_backward             1269 1095680KB, 15360KB, 1800KB, 2558KB, 40960KB
+  aten::cat                          807 1095680KB, 15360KB, 2048KB, 5120KB
+  aten::neg                          768 1095680KB, 2560KB, 7680KB
+  aten::copy_                        534 1095680KB
+  npu::npu_fusion_attention_grad     528 1095680KB, 15360KB, 5120KB
+  aten::mm                           468 1095680KB, 1152KB, 184320KB, 46080KB, 4608KB
+  aten::linalg_vector_norm           441 1095680KB
+  aten::clone                        402 15360KB, 5120KB, 92160KB
+  aten::sum                          350 1095680KB
+  npu::_npu_dtype_cast               268 30720KB, 7200KB
+  aten::addmm                        216 1095680KB, 46080KB
+  aten::div                          198 1095680KB, 30720KB
+  aten::matmul                       195 1095680KB, 15360KB
+  npu::npu_swiglu_backward           192 1095680KB, 81920KB
+  npu::npu_rms_norm_backward         192 1095680KB, 30720KB
+  npu::npu_fusion_attention          132 1095680KB
+  aten::mean                          99 1095680KB
+  aten::pow                           99 1095680KB
+
+## 可疑信号
+  [DEFINITE]=可直接行动  [SIGNAL]=异常，根因未定 — 需结合其他 profiling 维度交叉验证
+  - [DEFINITE] 重复的等大小分配 (buffer 复用机会):
+    aten::mul: 30720KB x 891 次
+    npu::npu_dtype_cast: 1095680KB x 582 次
+    aten::copy_: 1095680KB x 534 次
+    npu::_npu_dtype_cast: 15360KB x 480 次
+    aten::matmul_backward: 15360KB x 480 次
+    aten::linalg_vector_norm: 1095680KB x 441 次
+    aten::mul: 15360KB x 384 次
+    aten::neg: 1095680KB x 384 次
+  - [DEFINITE] 短生命周期大 tensor churn: 11344 个 tensor，累计 5226775MB
+    分配后立即释放 — 预分配可消除此 overhead
+
+## Parallelism 触发分析
+  HBM: 64GB  |  Peak: 37,711MB (58% HBM)
+  大 tensor (>5GB):
+    短生命周期 (<1s, 浪费):  0 个 tensor, 共 0MB
+      ↳ peak 时刻仍存活: 0MB
+    长生命周期 (>1s, 必要): 0 个 tensor, 0MB
+  消除浪费后的预估 peak: 37,711MB (58% HBM)
+
+  Peak 时无短生命周期大 tensor。内存不是 parallelism 触发因素。
+
+## Peak 归因 (peak 时刻存活的 tensor)
+  Peak at ts=1788113736235754us | 1,173 个 tensor 存活 | sum=28,934MB
+  按大小排序的 Top 20 (这些驱动 peak — 优先减少/复用它们):
+      264.0 MB  aten::addmm
+      264.0 MB  aten::gelu
+      264.0 MB  aten::addmm
+      264.0 MB  aten::gelu
+      264.0 MB  aten::addmm
+      264.0 MB  aten::gelu
+      264.0 MB  aten::addmm
+      264.0 MB  aten::gelu
+      264.0 MB  aten::addmm
+      264.0 MB  aten::gelu
+      264.0 MB  aten::addmm
+      264.0 MB  aten::gelu
+      264.0 MB  aten::addmm
+      264.0 MB  aten::gelu
+      264.0 MB  aten::addmm
+      264.0 MB  aten::gelu
+      264.0 MB  aten::addmm
+      264.0 MB  aten::gelu
+      264.0 MB  aten::addmm
+      264.0 MB  aten::gelu
+
+----------------------------------------------------------------------
+--- G. CANN 运行时 ---
+
+# API Statistic 摘要 (CANN runtime API overhead)
+数据来源: profiling/20260831_021404_l1/rank_0/training-job-1788113403-5fd75f-master-0_413_20260831021533728_ascend_pt/ASCEND_PROFILER_OUTPUT/api_statistic.csv
+API 总耗时: 2266.1 ms
+
+## 按 Level
+  acl            calls=116,334  time=   1834.0 ms ( 80.9%)
+  communication  calls=  2,059  time=     33.0 ms (  1.5%)
+  node           calls= 18,908  time=    399.1 ms ( 17.6%)
+
+## ACL API Top 20 (host runtime，按总耗时)
+  Tiling = 每个 aclnn op 的 host 侧参数计算（可缓存；dynamic shape 重复 tiling 是浪费）。
+  API Name                           Count  Total(ms)   Avg(us)   Max(us)
+  -----------------------------------------------------------------------
+  aclrtSynchronizeDeviceWithTimeout      10     588.69  58869.43 315639.13
+  aclrtSynchronizeStreamWithTimeout      25     373.35  14934.15 228855.64
+  aclrtSynchronizeStream                34     229.35   6745.57  75823.52
+  aclnnNonzeroV2                         9     227.51  25279.28  75966.41
+  aclrtLaunchKernelWithHostArgs      18846     104.46      5.54     83.81
+  hcom_allReduce_                       61      42.41    695.18  11719.42
+  aclnnCast                           3339      36.33     10.88     94.43
+  aclrtStreamGetId                   50980      23.21      0.46     37.33
+  aclnnMatmul                         1746      18.90     10.82    100.15
+  aclnnMul                            1761      18.35     10.42     48.98
+  aclnnInplaceAdd                     1633      14.36      8.79     56.51
+  aclrtMemcpy                           47      11.94    254.00   1650.26
+  aclnnInplaceCopy                     984      10.39     10.55     68.47
+  aclnnCat                             522       9.94     19.04    279.39
+  aclnnNeg                             384       7.87     20.49     75.01
+  aclrtGetStreamAttribute            15931       7.82      0.49      6.78
+  aclnnMuls                            642       5.73      8.93     52.76
+  aclnnFlashAttentionScoreGrad         132       5.08     38.51     56.14
+  aclnnLinalgVectorNorm                441       4.84     10.98     70.68
+  aclnnAdd                             459       4.80     10.45     48.70
+
+  Tiling 小计: 3.8 ms (0.2% 占全部 API 时间)
+
+## Node 级 Launch
+  launch: count=18,908  total=399.1ms  avg=21.1us
+  (count 应与 trace_view Node@launch 事件一致。)
+
+## Communication API Top 5
+  Notify_Record            count= 1,019  total=    16.0ms  avg=15.70us
+  Notify_Wait              count= 1,019  total=    15.4ms  avg=15.12us
+  Reduce_TBE               count=     3  total=     1.1ms  avg=364.57us
+  Memcpy                   count=    12  total=     0.2ms  avg=20.30us
+  Reduce_Inline            count=     6  total=     0.2ms  avg=36.20us
+
+## 可疑信号
+  stream/device sync    1193.6 ms ( 52.7%)
+  other                532.1 ms ( 23.5%)
+  launch               104.5 ms (  4.6%)
+  tiling                 3.8 ms (  0.2%)
+  memory mgmt            0.1 ms (  0.0%)
+  [SIGNAL] - Sync 主导 ACL API 耗时（SynchronizeStream/Device）。显式 sync 或 .item() 强制 D-H；交叉验证 operator_details 的 sync category。
+
+## 交叉验证
+  - 对比 operator_details: 此处的 tiling/launch 是该处所示 host 时间的 CANN-API 层（按 op 名）。
+  - 对比 trace_view: node launch count 与 Node@launch 一致；tiling 在 host thread 上先于每次 launch。
+
+----------------------------------------------------------------------
+--- H. 通信（多卡） ---
+
+# Communication 分析
+数据来源: profiling/20260831_021404_l1/rank_0/training-job-1788113403-5fd75f-master-0_413_20260831021533728_ascend_pt/ASCEND_PROFILER_OUTPUT/communication.json
+Matrix: profiling/20260831_021404_l1/rank_0/training-job-1788113403-5fd75f-master-0_413_20260831021533728_ascend_pt/ASCEND_PROFILER_OUTPUT/communication_matrix.json
+
+## 1. 摘要
+  总 op 数: 64  |  P2P op: 0
+  总 Elapse: 1069.3ms  |  Transit: 0.1ms  |  Wait: 1066.4ms  |  Sync: 1063.5ms  |  Idle: 2.8ms
+  耗时拆分: Transit 0.0%  Wait 99.7%  Sync 99.5%  Idle 0.3%
+
+## 2. 按算子类型
+  Type             Count  Elapse(ms)  Transit(ms)   Wait(ms)  Wait%  Transit%
+  --------------- ------ ----------- ------------ ---------- ------ ---------
+  allReduce           62      1063.5          0.1     1060.7  99.7%      0.0%
+  broadcast            2         5.8          0.0        5.8  98.7%      0.0%
+
+## 3. 按 Elapse Time 排序的 Top 15 Op
+  Op                                                 Type         Elapse(ms)  Wait%
+  -------------------------------------------------- ------------ ---------- ------
+  hcom_allReduce__612_2_1@5862276093215481612        allReduce        240.43  99.8%
+  hcom_allReduce__612_1_1@5862276093215481612        allReduce        116.61  99.5%
+  hcom_allReduce__612_0_1@5862276093215481612        allReduce        115.17  99.8%
+  hcom_allReduce__612_3_1@5862276093215481612        allReduce        114.38 100.0%
+  hcom_allReduce__612_60_1@5862276093215481612       allReduce         35.97  99.8%
+  hcom_allReduce__612_59_1@5862276093215481612       allReduce         24.68 100.0%
+  hcom_allReduce__612_53_1@5862276093215481612       allReduce         18.38 100.0%
+  hcom_allReduce__612_49_1@5862276093215481612       allReduce         18.24 100.0%
+  hcom_allReduce__612_56_1@5862276093215481612       allReduce         18.17 100.0%
+  hcom_allReduce__612_57_1@5862276093215481612       allReduce         18.16 100.0%
+  hcom_allReduce__612_51_1@5862276093215481612       allReduce         18.15 100.0%
+  hcom_allReduce__612_58_1@5862276093215481612       allReduce         18.14 100.0%
+  hcom_allReduce__612_55_1@5862276093215481612       allReduce         18.12 100.0%
+  hcom_allReduce__612_50_1@5862276093215481612       allReduce         18.11 100.0%
+  hcom_allReduce__612_48_1@5862276093215481612       allReduce         17.96 100.0%
+
+## 4. 逐 Link Bandwidth (来自 communication_matrix)
+  有数据的 link: 58  |  Bandwidth: min=0.0 avg=40.6 max=124.8 GB/s
+
+  Bandwidth 最高的 Top 5 个 link:
+      124.8 GB/s        19.7MB  LOCAL  0-0    allreduce-top1@5862276093215481612
+      114.7 GB/s         9.2MB  SIO    0-1    allreduce-top1@5862276093215481612
+      110.8 GB/s        59.0MB  LOCAL  0-0    allreduce-top1@5862276093215481612
+      110.8 GB/s        59.0MB  LOCAL  0-0    allreduce-middle@5862276093215481612
+      110.8 GB/s        59.0MB  LOCAL  0-0    allreduce-bottom1@5862276093215481612
+
+  Bandwidth 最低的 Top 5 个 link (潜在瓶颈):
+        0.0 GB/s         0.0MB  HCCS   0-8    allreduce-total@5862276093215481612
+        0.0 GB/s         0.0MB  HCCS   0-8    allreduce-bottom1@5862276093215481612
+        0.0 GB/s         0.0MB  HCCS   0-8    allreduce-middle@5862276093215481612
+        0.0 GB/s         0.0MB  HCCS   0-8    allreduce-top1@5862276093215481612
+        0.0 GB/s         0.0MB  HCCS   0-4    allreduce-total@5862276093215481612
+
+## 5. 可疑信号
+  [DEFINITE]=可直接行动  [SIGNAL]=异常，需结合其他维度交叉验证
+  [DEFINITE] Wait time 占主导: communication 时间的 100% 在等待，而非传输。
+    - Communication 是 synchronization-bound 而非 bandwidth-bound。检查: communication-computation overlap、rank straggler（部分 rank 慢 - 其他等待）、或过多 sync 点。
+  [SIGNAL] allReduce: 62 个 op，100% wait time — 交叉验证: 用 trace_view 查看 compute-comm overlap，检查 straggler rank
+  [SIGNAL] HCCS: 100% 小包 (<1MB) — 交叉验证: 考虑 batching 以减少小包 overhead
+  [SIGNAL] SIO: 100% 小包 (<1MB) — 交叉验证: 考虑 batching 以减少小包 overhead
+
+======================================================================
