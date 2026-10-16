@@ -68,15 +68,6 @@ a single successful run, not an average over seeds.
 The optimized build removes **46.18%** of the training time, about **1.86x**. Both rows exit
 with code 0 and land inside the target band `1.08 ± 0.01`.
 
-What the optimized build changes, with no change to the model structure, optimizer, data
-order, seed, batch size, step count or learning-rate schedule:
-
-- native GQA and BF16 RoPE, cutting attention copies and dtype conversions;
-- fused residual RMSNorm, fused SwiGLU, and a fused loss over the valid tokens;
-- gradient checkpointing disabled, trading memory for less recomputation;
-- attention-mask reuse, cheaper image-token replacement and data synchronisation;
-- the loss read deferred, so each microbatch waits on fewer NPU synchronisations.
-
 The baseline additionally carries a process-exit compatibility fix that is outside the timed
 region. The operator-level and precision changes are visible in the diff between
 `nanoVLM_npu/baseline/source/` and `nanoVLM_npu/optimized/source/`.
