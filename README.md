@@ -7,7 +7,7 @@
 > In this fork the same training is ported and benchmarked on **eight Ascend NPUs (two dies per NPU; 16 dies total)**. Two implementations are recorded: an unchanged port and an NPU-optimized build produced with the [NPU_optimal_reference_skills](https://github.com/YChen-zzz/NPU_optimal_reference_skills) workflow.
 >
 > - The leaderboard table below is the main result of this repository.
-> - Sources and successful run logs live under `nanoVLM_npu/baseline/` and `nanoVLM_npu/optimized/`.
+> - Sources and successful run logs live under `nanoVLM_npu/record01_kerminal_migration/` and `nanoVLM_npu/record02_optimization_v1/`.
 > - The section of the upstream README that mentions CUDA / H100 / multi-GPU launch flags is kept for history and attribution only and does **not** describe the NPU runs.
 
 ---
@@ -36,13 +36,13 @@ trainings in parallel.
 Run the optimized build:
 
 ```bash
-bash nanoVLM_npu/optimized/run.sh
+bash nanoVLM_npu/record02_optimization_v1/run.sh
 ```
 
 Run the baseline:
 
 ```bash
-bash nanoVLM_npu/baseline/run.sh
+bash nanoVLM_npu/record01_kerminal_migration/run.sh
 ```
 
 `NANOVLM_ASSETS` defaults to `../../offline_assets` relative to each `source/` directory; set it
@@ -52,7 +52,7 @@ full reproduction recorded here ran in the `llm_test_migrated` environment; the 
 image entry point has been statically checked but not yet re-run end to end inside a clean
 default image.
 
-## NPU leaderboard
+## NPU leaderboard record history
 
 Times are the timed training region of one complete run, `BENCH_MEASURE elapsed_s`: 210
 steps of which the first 10 are warmup, i.e. 200 timed steps / 800 microbatches. Model
@@ -60,17 +60,17 @@ loading, warmup and the final validation sit outside the timed region, and the f
 validation runs 64 batches per rank. Rows are sorted from longest to shortest; each row is
 a single successful run, not an average over seeds.
 
-| # | Time | Final val loss | Implementation | Log |
-| - | - | - | - | - |
-| 1 | 929.909 s | 1.08315766 | baseline port, upstream algorithm unchanged | [log](nanoVLM_npu/baseline/logs/migrated_20261016.log) |
-| 2 | **500.434 s** | 1.08362198 | **\[optimized\]** NPU-targeted build on top of the port | [log](nanoVLM_npu/optimized/logs/migrated_20261016.log) |
+| # | Record | Time | Final val loss | Implementation | Log |
+| - | - | - | - | - | - |
+| 1 | `nanoVLM_npu/record01_kerminal_migration` | 929.909 s | 1.08315766 | **[baseline]** baseline port, upstream algorithm unchanged | [log](nanoVLM_npu/record01_kerminal_migration/logs/migrated_20261016.log) |
+| 2 | `nanoVLM_npu/record02_optimization_v1` | **500.434 s** | 1.08362198 | **\[optimized\]** NPU-targeted build on top of the port | [log](nanoVLM_npu/record02_optimization_v1/logs/migrated_20261016.log) |
 
 The optimized build removes **46.18%** of the training time, about **1.86x**. Both rows exit
 with code 0 and land inside the target band `1.08 ± 0.01`.
 
 The baseline additionally carries a process-exit compatibility fix that is outside the timed
 region. The operator-level and precision changes are visible in the diff between
-`nanoVLM_npu/baseline/source/` and `nanoVLM_npu/optimized/source/`.
+`nanoVLM_npu/record01_kerminal_migration/source/` and `nanoVLM_npu/record02_optimization_v1/source/`.
 
 ## Rules
 
