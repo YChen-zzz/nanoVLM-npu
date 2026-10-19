@@ -2,13 +2,13 @@
 
 > **This repository tracks NPU reproductions of the nanoVLM training benchmark on eight Ascend NPUs.**
 >
-> Based on [huggingface/nanoVLM](https://github.com/huggingface/nanoVLM) — the upstream project trains a ~222M-parameter vision-language model (SigLIP2 vision encoder + SmolLM2 language model) on FineVision. Upstream code, documentation and contributor credit are preserved in full below.
+> Based on [huggingface/nanoVLM](https://github.com/huggingface/nanoVLM). Upstream code, documentation and contributor credit are preserved below. **The recorded runs in this repository use a ~460M-parameter nanoVLM configuration**: `SigLIP2-base-patch16-512` (86,433,024 parameters) + `SmolLM2-360M-Instruct` (361,884,480 parameters) + projector, totaling **460,113,984 parameters**. This is not the upstream 222M default.
 >
 > In this fork the same training is ported and benchmarked on **eight Ascend NPUs (two dies per NPU; 16 dies total)**. Two implementations are recorded: an unchanged port and an NPU-optimized build produced with the [NPU_optimal_reference_skills](https://github.com/YChen-zzz/NPU_optimal_reference_skills) workflow.
 >
 > - The leaderboard table below is the main result of this repository.
 > - Sources and successful run logs live under `nanoVLM_npu/record01_kerminal_migration/` and `nanoVLM_npu/record02_optimization_v1/`.
-> - The section of the upstream README that mentions CUDA / H100 / multi-GPU launch flags is kept for history and attribution only and does **not** describe the NPU runs.
+> - The section of the upstream README that mentions CUDA / H100 / multi-GPU launch flags is kept for history and attribution only and does **not** describe the NPU runs. Its 222M/450M model references describe upstream defaults; this repository's runs use the 460M configuration above.
 
 ---
 
@@ -25,8 +25,20 @@ The NPU runs use a common reference runtime with eight Ascend NPUs:
 | Hardware | eight Ascend NPUs (two dies per NPU; 16 dies total) |
 | Process count | 16 ranks in one DDP job |
 | Training batch | 2 per rank, gradient accumulation 4, global batch 128 |
-| Data and weights | FineVision parquet, `SigLIP2-base-patch16-512`, `SmolLM2-360M-Instruct` |
+| Model | ~460M-parameter VLM: `SigLIP2-base-patch16-512` + `SmolLM2-360M-Instruct`; 460,113,984 parameters |
+| Data and weights | [FineVision](https://huggingface.co/datasets/HuggingFaceM4/FineVision) parquet, [SigLIP2-base-patch16-512](https://huggingface.co/google/siglip2-base-patch16-512) (86,433,024 vision params), [SmolLM2-360M-Instruct](https://huggingface.co/HuggingFaceTB/SmolLM2-360M-Instruct) (361,884,480) |
 | Default image | `docker.cnb.cool/nilpotenter/docker/codeserver-mindspeed:v1.0.5` |
+
+The backbone checkpoints are available on Hugging Face:
+
+- Vision encoder: [google/siglip2-base-patch16-512](https://huggingface.co/google/siglip2-base-patch16-512)
+- Language model: [HuggingFaceTB/SmolLM2-360M-Instruct](https://huggingface.co/HuggingFaceTB/SmolLM2-360M-Instruct)
+
+Download them under `$NANOVLM_ASSETS/models/` with the directory names expected by `run.sh`
+(`siglip2-base-patch16-512/` and `SmolLM2-360M-Instruct/`). The SigLIP2 repository contains
+the full SigLIP2 model; nanoVLM uses its vision tower only (86,433,024 parameters).
+
+The training data comes from the [FineVision](https://huggingface.co/datasets/HuggingFaceM4/FineVision) mixture; a concatenated and shuffled version is available as [FineVision_full_shuffled](https://huggingface.co/datasets/HuggingFaceM4/FineVision_full_shuffled). The recorded run expects the preprocessed path `$NANOVLM_ASSETS/datasets/FineVision_concat_shuffled_2/full/data-*.parquet`, so the raw per-subset dataset is not a drop-in replacement.
 
 `torchrun --nproc_per_node=16` launches 16 processes for a single distributed training job;
 it does not mean 16 independent trainings running at once. Both implementations take the
